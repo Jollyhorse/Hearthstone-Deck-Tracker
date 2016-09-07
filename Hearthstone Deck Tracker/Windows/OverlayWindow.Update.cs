@@ -54,7 +54,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 			var oppBoard = Core.Game.Opponent.Board.Where(x => x.IsMinion).OrderBy(x => x.GetTag(ZONE_POSITION)).ToList();
 			var playerBoard = Core.Game.Player.Board.Where(x => x.IsMinion).OrderBy(x => x.GetTag(ZONE_POSITION)).ToList();
 			UpdateMouseOverDetectionRegions(oppBoard, playerBoard);
-			if(!_game.IsInMenu && _game.IsMulliganDone && User32.IsHearthstoneInForeground())
+			if(!_game.IsInMenu && _game.IsMulliganDone && User32.IsHearthstoneInForeground() && IsVisible)
 				DetectMouseOver(playerBoard, oppBoard);
 			else
 				FlavorTextVisibility = Collapsed;
@@ -90,7 +90,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 			ListViewOpponent.Visibility = Config.Instance.HideOpponentCards ? Collapsed : Visible;
 			ListViewPlayer.Visibility = Config.Instance.HidePlayerCards ? Collapsed : Visible;
 
-			var gameStarted = !_game.IsInMenu && _game.Entities.Count >= 67;
+			var gameStarted = !_game.IsInMenu && _game.Entities.Count >= 67 && _game.Player.PlayerEntities.Any();
 			SetCardCount(_game.Player.HandCount, !gameStarted ? 30 : _game.Player.DeckCount);
 
 			SetOpponentCardCount(_game.Opponent.HandCount, !gameStarted ? 30 : _game.Opponent.DeckCount);
@@ -188,20 +188,20 @@ namespace Hearthstone_Deck_Tracker.Windows
 		}
 
 
-		public async void UpdatePosition()
+		public void UpdatePosition()
 		{
 			//hide the overlay depenting on options
 			ShowOverlay(
 						!((Config.Instance.HideInBackground && !User32.IsHearthstoneInForeground())
 						  || (Config.Instance.HideOverlayInSpectator && _game.CurrentGameMode == GameMode.Spectator) || Config.Instance.HideOverlay
-						  || ForceHidden));
+						  || ForceHidden || Helper.GameWindowState == WindowState.Minimized));
 
 
 			var hsRect = User32.GetHearthstoneRect(true);
 
 			//hs window has height 0 if it just launched, screwing things up if the tracker is started before hs is. 
 			//this prevents that from happening. 
-			if (hsRect.Height == 0 || Visibility != Visible)
+			if (hsRect.Height == 0 || (Visibility != Visible && Core.Windows.CapturableOverlay == null))
 				return;
 
 			var prevWidth = Width;
@@ -223,7 +223,8 @@ namespace Hearthstone_Deck_Tracker.Windows
 
 			try
 			{
-				await UpdateCardTooltip();
+				if(Visibility == Visible)
+					UpdateCardTooltip();
 			}
 			catch (Exception ex)
 			{

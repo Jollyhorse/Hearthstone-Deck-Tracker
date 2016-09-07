@@ -24,15 +24,12 @@ namespace Hearthstone_Deck_Tracker.LogReader
 		private static readonly List<LogReader> LogReaders = new List<LogReader>();
 		private static readonly PowerHandler PowerLineHandler = new PowerHandler();
 		private static readonly RachelleHandler RachelleHandler = new RachelleHandler();
-		private static readonly AssetHandler AssetHandler = new AssetHandler();
-		private static readonly BobHandler BobHandler = new BobHandler();
 		private static readonly ArenaHandler ArenaHandler = new ArenaHandler();
-		private static readonly NetHandler NetHandler = new NetHandler();
 		private static readonly LoadingScreenHandler LoadingScreenHandler = new LoadingScreenHandler();
 		private static readonly FullScreenFxHandler FullScreenFxHandler = new FullScreenFxHandler();
 		private static LogReader _gameStatePowerLogReader;
 		private static LogReader _powerLogReader;
-		private static LogReader _netLogReader;
+		private static LogReader _loadingScreenLogReader;
 		private static HsGameState _gameState;
 		private static GameV2 _game;
 		private static DateTime _startingPoint;
@@ -43,14 +40,11 @@ namespace Hearthstone_Deck_Tracker.LogReader
 		{
 			_gameStatePowerLogReader = new LogReader(GameStatePowerLogReaderInfo);
 			_powerLogReader = new LogReader(PowerLogReaderInfo);
-			_netLogReader = new LogReader(NetLogReaderInfo);
+			_loadingScreenLogReader = new LogReader(LoadingScreenLogReaderInfo);
 			LogReaders.Add(_powerLogReader);
-			LogReaders.Add(_netLogReader);
-			LogReaders.Add(new LogReader(BobLogReaderInfo));
+			LogReaders.Add(_loadingScreenLogReader);
 			LogReaders.Add(new LogReader(RachelleLogReaderInfo));
-			LogReaders.Add(new LogReader(AssetLogReaderInfo));
 			LogReaders.Add(new LogReader(ArenaLogReaderInfo));
-			LogReaders.Add(new LogReader(LoadingScreenLogReaderInfo));
 			LogReaders.Add(new LogReader(FullScreenFxLogReaderInfo));
 		}
 
@@ -108,7 +102,7 @@ namespace Hearthstone_Deck_Tracker.LogReader
 							logLines.Add(line);
 						}
 					}
-					powerLines = _gameStatePowerLogReader.Collect();
+					powerLines = _gameStatePowerLogReader.Collect().ToList();
 				});
 				ProcessNewLines();
 				if(powerLines.Any())
@@ -125,8 +119,8 @@ namespace Hearthstone_Deck_Tracker.LogReader
 		{
 			var powerEntry =
 				_powerLogReader.FindEntryPoint(new[] {"tag=GOLD_REWARD_STATE", "End Spectator"});
-			var netEntry = _netLogReader.FindEntryPoint("ConnectAPI.GotoGameServer");
-			return netEntry > powerEntry ? netEntry : powerEntry;
+			var lsEntry = _loadingScreenLogReader.FindEntryPoint("Gameplay.Start");
+			return lsEntry > powerEntry ? lsEntry : powerEntry;
 		}
 
 		public static int GetTurnNumber() => _gameState.GetTurnNumber();
@@ -167,7 +161,6 @@ namespace Hearthstone_Deck_Tracker.LogReader
 			_game = game;
 			_gameState = new HsGameState(game);
 			_gameState.GameHandler = new GameEventHandler(game);
-			_gameState.GameHandler.ResetConstructedImporting();
 			_gameState.Reset();
 		}
 
@@ -188,27 +181,16 @@ namespace Hearthstone_Deck_Tracker.LogReader
 							PowerLineHandler.Handle(line.Line, _gameState, _game);
 							OnPowerLogLine.Execute(line.Line);
 							break;
-						case "Asset":
-							AssetHandler.Handle(line.Line, _gameState, _game);
-							OnAssetLogLine.Execute(line.Line);
-							break;
-						case "Bob":
-							BobHandler.Handle(line.Line, _gameState, _game);
-							OnBobLogLine.Execute(line.Line);
-							break;
 						case "Rachelle":
 							RachelleHandler.Handle(line.Line, _gameState, _game);
 							OnRachelleLogLine.Execute(line.Line);
 							break;
 						case "Arena":
-							ArenaHandler.Handle(line.Line, _gameState, _game);
+							ArenaHandler.Handle(line, _gameState, _game);
 							OnArenaLogLine.Execute(line.Line);
 							break;
 						case "LoadingScreen":
-							LoadingScreenHandler.Handle(line.Line, _gameState, _game);
-							break;
-						case "Net":
-							NetHandler.Handle(line, _gameState, _game);
+							LoadingScreenHandler.Handle(line, _gameState, _game);
 							break;
 						case "FullScreenFX":
 							FullScreenFxHandler.Handle(line, _game);

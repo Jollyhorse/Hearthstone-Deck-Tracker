@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Xml.Serialization;
 using Hearthstone_Deck_Tracker.Enums;
+using Hearthstone_Deck_Tracker.Utility;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 
 #endregion
@@ -22,6 +23,25 @@ namespace Hearthstone_Deck_Tracker
 		public static readonly string AppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
 		                                            + @"\HearthstoneDeckTracker";
 
+
+#if(!SQUIRREL)
+		[DefaultValue(".")]
+		public string DataDirPath = ".";
+
+		//updating from <= 0.5.1: 
+		//SaveConfigInAppData and SaveDataInAppData are set to SaveInAppData AFTER the config isloaded
+		//=> Need to be null to avoid creating new config in appdata if config is stored locally.
+		[DefaultValue(true)]
+		public bool? SaveConfigInAppData;
+
+		[DefaultValue(true)]
+		public bool? SaveDataInAppData = null;
+
+		[DefaultValue(true)]
+		public bool SaveInAppData = true;
+#endif
+
+
 		[DefaultValue("Blue")]
 		public string AccentName = "Blue";
 
@@ -31,8 +51,8 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue("00000000-0000-0000-0000-000000000000")]
 		public string ActiveDeckIdString = Guid.Empty.ToString();
 
-		[DefaultValue(true)]
-		public bool AdditionalOverlayTooltips = true;
+		[DefaultValue(false)]
+		public bool AdditionalOverlayTooltips = false;
 
 		[DefaultValue(false)]
 		public bool AdvancedOptions = false;
@@ -79,8 +99,8 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(1)]
 		public int ArenaStatsCustomSeasonMin = 1;
 
-		[DefaultValue(25)]
-		public int ArenaStatsCustomSeasonMax = 25;
+		[DefaultValue(null)]
+		public int? ArenaStatsCustomSeasonMax = null;
 
 		[DefaultValue(71.67)]
 		public double AttackIconPlayerVerticalPosition = 71.67;
@@ -93,6 +113,9 @@ namespace Hearthstone_Deck_Tracker
 
 		[DefaultValue(67.5)]
 		public double AttackIconOpponentHorizontalPosition = 67.5;
+
+		[DefaultValue(false)]
+		public bool AutoArchiveArenaDecks = false;
 
 		[DefaultValue(true)]
 		public bool AutoClearDeck = true;
@@ -118,6 +141,9 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue("Arena {Date dd-MM hh:mm}")]
 		public string ArenaDeckNameTemplate = "Arena {Date dd-MM hh:mm}";
 
+		[DefaultValue("Brawl {Date dd-MM hh:mm}")]
+		public string BrawlDeckNameTemplate = "Brawl {Date dd-MM hh:mm}";
+
 		[DefaultValue(false)]
 		public bool BringHsToForeground = false;
 
@@ -141,6 +167,12 @@ namespace Hearthstone_Deck_Tracker
 
 		[DefaultValue(true)]
 		public bool CardDbIncludeWildOnlyCards = true;
+
+		[DefaultValue(true)]
+		public bool ConstructedAutoImportNew = true;
+
+		[DefaultValue(true)]
+		public bool ConstructedAutoUpdate = true;
 
 		[DefaultValue(false)]
 		public bool ConstructedStatsAsPercent = false;
@@ -193,8 +225,8 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(1)]
 		public int ConstructedStatsCustomSeasonMin = 1;
 
-		[DefaultValue(25)]
-		public int ConstructedStatsCustomSeasonMax = 25;
+		[DefaultValue(null)]
+		public int? ConstructedStatsCustomSeasonMax = null;
 
 		[DefaultValue(0)]
 		public int ConstructedStatsTurnsFilterMin = 0;
@@ -220,9 +252,6 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(false)]
 		public bool StartHearthstoneWithHDT = false;
 
-		[DefaultValue(new string[0])]
-		public string[] ConstructedImportingIgnoreCachedIds = new string[0];
-
 		[DefaultValue("")]
 		public string CreatedByVersion = "";
 
@@ -234,9 +263,6 @@ namespace Hearthstone_Deck_Tracker
 
 		[DefaultValue(-1)]
 		public int CustomWidth = -1;
-
-		[DefaultValue(".")]
-		public string DataDirPath = ".";
 
 		[DefaultValue(false)]
 		public bool Debug = false;
@@ -259,14 +285,11 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(false)]
 		public bool DiscardZeroTurnGame = false;
 
-		[DefaultValue(true)]
-		public bool DisplayNetDeckAd = true;
-
 		[DefaultValue(GameMode.All)]
 		public GameMode DisplayedMode = GameMode.All;
 
-		[DefaultValue(DisplayedStats.Selected)]
-		public DisplayedStats DisplayedStats = DisplayedStats.Selected;
+		[DefaultValue(DisplayedStats.All)]
+		public DisplayedStats DisplayedStats = DisplayedStats.All;
 
 		[DefaultValue(DisplayedTimeFrame.AllTime)]
 		public DisplayedTimeFrame DisplayedTimeFrame = DisplayedTimeFrame.AllTime;
@@ -361,9 +384,6 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(false)]
 		public bool ExtraFeaturesSecrets = false;
 
-		[DefaultValue(false)]
-		public bool FixedDuplicateMatches = false;
-
 		[DefaultValue(true)]
 		public bool FlashHsOnTurnStart = true;
 
@@ -421,6 +441,9 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(@"C:\Program Files (x86)\Hearthstone")]
 		public string HearthstoneDirectory = @"C:\Program Files (x86)\Hearthstone";
 
+		[DefaultValue("Logs")]
+		public string HearthstoneLogsDirectoryName = "Logs";
+
 		[DefaultValue("Hearthstone")]
 		public string HearthstoneWindowName = "Hearthstone";
 
@@ -430,14 +453,14 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(false)]
 		public bool HideDecksInOverlay = false;
 
-		[DefaultValue(false)]
-		public bool HideDrawChances = false;
+		[DefaultValue(true)]
+		public bool HideDrawChances = true;
 
 		[DefaultValue(false)]
 		public bool HideInBackground = false;
 
-		[DefaultValue(false)]
-		public bool HideInMenu = false;
+		[DefaultValue(true)]
+		public bool HideInMenu = true;
 
 		[DefaultValue(true)]
 		public bool HideOpponentAttackIcon = true;
@@ -460,8 +483,8 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(false)]
 		public bool HideOpponentCards = false;
 
-		[DefaultValue(false)]
-		public bool HideOpponentDrawChances = false;
+		[DefaultValue(true)]
+		public bool HideOpponentDrawChances = true;
 
 		[DefaultValue(false)]
 		public bool HideOpponentFatigueCount = false;
@@ -513,12 +536,6 @@ namespace Hearthstone_Deck_Tracker
 
 		[DefaultValue(true)]
 		public bool KeepStatsWhenDeletingDeck = true;
-
-		[DefaultValue("None")]
-		public string KeyPressOnGameEnd = "None";
-
-		[DefaultValue("None")]
-		public string KeyPressOnGameStart = "None";
 
 		[Obsolete]
 		[DefaultValue("")]
@@ -626,12 +643,6 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(false)]
 		public bool OverlaySecretToolTipsOnly = false;
 
-		[DefaultValue(false)]
-		public bool OwnsGoldenFeugen = false;
-
-		[DefaultValue(false)]
-		public bool OwnsGoldenStalagg = false;
-
 		[DefaultValue(new[] {"Win Rate", "Cards", "Card Counter", "Draw Chances", "Fatigue Counter"})]
 		public string[] PanelOrderOpponent = {"Win Rate", "Cards", "Card Counter", "Draw Chances", "Fatigue Counter"};
 
@@ -704,9 +715,6 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(false)]
 		public bool RemoveCardsFromDeck = false;
 
-		[DefaultValue(false)]
-		public bool RemovedNoteUrls = false;
-
 		[DefaultValue(true)]
 		public bool ReplayViewerShowAttack = true;
 
@@ -744,31 +752,7 @@ namespace Hearthstone_Deck_Tracker
 		public int ReplayWindowWidth = 1250;
 
 		[DefaultValue(false)]
-		public bool ResolvedDeckStatsIds = false;
-
-		[DefaultValue(false)]
 		public bool ReselectLastDeckUsed = false;
-
-		[DefaultValue(false)]
-		public bool ResolvedDeckStatsIssue = false;
-
-		[DefaultValue(false)]
-		public bool ResolvedOpponentNames = false;
-
-		//updating from <= 0.5.1: 
-		//SaveConfigInAppData and SaveDataInAppData are set to SaveInAppData AFTER the config isloaded
-		//=> Need to be null to avoid creating new config in appdata if config is stored locally.
-		[DefaultValue(true)]
-		public bool? SaveConfigInAppData;
-
-		[DefaultValue(true)]
-		public bool? SaveDataInAppData = null;
-
-		[DefaultValue(true)]
-		public bool SaveHSLogIntoReplay = true;
-
-		[DefaultValue(true)]
-		public bool SaveInAppData = true;
 
 		[DefaultValue(15)]
 		public double SecretsLeft = 15;
@@ -782,8 +766,8 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(5)]
 		public double SecretsTop = 5;
 
-		[DefaultValue(ArenaImportingBehaviour.AutoAsk)]
-		public ArenaImportingBehaviour? SelectedArenaImportingBehaviour = ArenaImportingBehaviour.AutoAsk;
+		[DefaultValue(ArenaImportingBehaviour.AutoImportSave)]
+		public ArenaImportingBehaviour? SelectedArenaImportingBehaviour = ArenaImportingBehaviour.AutoImportSave;
 
 		[DefaultValue(new[] {HeroClassAll.All})]
 		public HeroClassAll[] SelectedDeckPickerClasses = {HeroClassAll.All};
@@ -830,8 +814,8 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(false)]
 		public bool ShowBatteryLifePercent = false;
 
-		[DefaultValue(true)]
-		public bool ShowConstructedImportMessage = true;
+		[DefaultValue(false)]
+		public bool ShowCapturableOverlay = false;
 
 		[DefaultValue(false)]
 		public bool ShowDeckTitle = false;
@@ -857,8 +841,8 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(false)]
 		public bool ShowLastPlayedDateOnDeck = false;
 		
-		[DefaultValue(true)]
-		public bool ShowLoginDialog = true;
+		[DefaultValue(false)]
+		public bool ShowLoginDialog = false;
 
 		[DefaultValue(true)]
 		public bool ShowSplashScreen = true;
@@ -926,6 +910,9 @@ namespace Hearthstone_Deck_Tracker
 		[DefaultValue(510)]
 		public int StatsWindowWidth = 510;
 
+		[DefaultValue("#FF00FF")]
+		public string StreamingOverlayBackground = "#FF00FF";
+
 		[DefaultValue(true)]
 		public bool TagDecksOnImport = true;
 
@@ -991,9 +978,6 @@ namespace Hearthstone_Deck_Tracker
 
 		[DefaultValue(false)]
 		public bool UseFullTextSearch = false;
-
-		[DefaultValue(false)]
-		public bool UseOldArenaImporting = false;
 
 		[DefaultValue(true)]
 		public bool UseSameScaling = true;
@@ -1062,15 +1046,45 @@ namespace Hearthstone_Deck_Tracker
 		#region Properties
 
 		[Obsolete]
-		public string HomeDir => Instance.SaveInAppData ? AppDataPath + "/" : string.Empty;
+		public string HomeDir
+		{
+			get
+			{
+#if(SQUIRREL)
+				return AppDataPath + "\\";
+#else
+				return Instance.SaveInAppData ? AppDataPath + "\\" : string.Empty;
+#endif
+			}
+		}
 
 		public string BackupDir => Path.Combine(DataDir, "Backups");
 
 		public string ConfigPath => Instance.ConfigDir + "config.xml";
 
-		public string ConfigDir => Instance.SaveConfigInAppData == false ? string.Empty : AppDataPath + "\\";
+		public string ConfigDir
+		{
+			get
+			{
+#if(SQUIRREL)
+				return AppDataPath + "\\";
+#else
+				return Instance.SaveConfigInAppData == false ? string.Empty : AppDataPath + "\\";
+#endif
+			}
+		}
 
-		public string DataDir => Instance.SaveDataInAppData == false ? DataDirPath + "\\" : AppDataPath + "\\";
+		public string DataDir
+		{
+			get
+			{
+#if(SQUIRREL)
+				return AppDataPath + "\\";
+#else
+				return Instance.SaveDataInAppData == false ? DataDirPath + "\\" : AppDataPath + "\\";;
+#endif
+			}
+		}
 
 		public string ReplayDir => Path.Combine(DataDir, "Replays");
 
@@ -1119,26 +1133,48 @@ namespace Hearthstone_Deck_Tracker
 			Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 			try
 			{
+				var config = Path.Combine(AppDataPath, "config.xml");
+#if(SQUIRREL)
+				if(File.Exists(config))
+				{
+					_config = XmlManager<Config>.Load(config);
+					foundConfig = true;
+				}
+#else
 				if(File.Exists("config.xml"))
 				{
 					_config = XmlManager<Config>.Load("config.xml");
 					foundConfig = true;
 				}
-				else if(File.Exists(AppDataPath + @"\config.xml"))
+				else if(File.Exists(config))
 				{
-					_config = XmlManager<Config>.Load(AppDataPath + @"\config.xml");
+					_config = XmlManager<Config>.Load(config);
 					foundConfig = true;
 				}
 				else if(!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)))
 					//save locally if appdata doesn't exist (when e.g. not on C)
 					Instance.SaveConfigInAppData = false;
+#endif
 			}
-			catch(Exception e)
+			catch(Exception ex)
 			{
-				MessageBox.Show(
-				                e.Message + "\n\n" + e.InnerException + "\n\n If you don't know how to fix this, please delete "
-				                + Instance.ConfigPath, "Error loading config.xml");
-				Application.Current.Shutdown();
+				Log.Error(ex);
+				try
+				{
+					if(File.Exists("config.xml"))
+					{
+						File.Move("config.xml", Helper.GetValidFilePath(".", "config_corrupted", "xml"));
+					}
+					else if(File.Exists(AppDataPath + @"\config.xml"))
+					{
+						File.Move(AppDataPath + @"\config.xml", Helper.GetValidFilePath(AppDataPath, "config_corrupted", "xml"));
+					}
+				}
+				catch(Exception ex1)
+				{
+					Log.Error(ex1);
+				}
+				_config = BackupManager.TryRestore<Config>("config.xml");
 			}
 
 			if(!foundConfig)
@@ -1147,6 +1183,7 @@ namespace Hearthstone_Deck_Tracker
 					Directory.CreateDirectory(Instance.ConfigDir);
 				Save();
 			}
+#if(!SQUIRREL)
 			else if(Instance.SaveConfigInAppData != null)
 			{
 				if(Instance.SaveConfigInAppData.Value) //check if config needs to be moved
@@ -1166,6 +1203,7 @@ namespace Hearthstone_Deck_Tracker
 					Log.Info("Moved config to local");
 				}
 			}
+#endif
 		}
 
 		public void ResetAll()

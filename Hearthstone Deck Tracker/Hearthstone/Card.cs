@@ -101,17 +101,17 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			_dbCard = dbCard;
 		}
 
-		private Language? _selectedLanguage;
+		private Locale? _selectedLanguage;
 
-		private Language SelectedLanguage
+		private Locale SelectedLanguage
 		{
 			get
 			{
 				if(_selectedLanguage.HasValue)
 					return _selectedLanguage.Value;
-				Language lang;
+				Locale lang;
 				if(!Enum.TryParse(Config.Instance.SelectedLanguage, out lang))
-					lang = Language.enUS;
+					lang = Locale.enUS;
 				_selectedLanguage = lang;
 				return _selectedLanguage.Value;
 			}
@@ -125,11 +125,11 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			PlayerClass = HearthDbConverter.ConvertClass(dbCard.Class);
 			Rarity = dbCard.Rarity;
 			Type = HearthDbConverter.CardTypeConverter(dbCard.Type);
-			Name = dbCard.GetLocName(Language.enUS);
+			Name = dbCard.GetLocName(Locale.enUS);
 			Cost = dbCard.Cost;
 			LocalizedName = dbCard.GetLocName(SelectedLanguage);
 			Text = dbCard.GetLocText(SelectedLanguage);
-			EnglishText = dbCard.GetLocText(Language.enUS);
+			EnglishText = dbCard.GetLocText(Locale.enUS);
 			Attack = dbCard.Attack;
 			Health = dbCard.Health;
 			Race = HearthDbConverter.RaceConverter(dbCard.Race);
@@ -139,7 +139,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			Set = HearthDbConverter.SetConverter(dbCard.Set);
 			foreach(var altLangStr in Config.Instance.AlternativeLanguages)
 			{
-				Language altLang;
+				Locale altLang;
 				if(Enum.TryParse(altLangStr, out altLang))
 				{
 					AlternativeNames.Add(dbCard.GetLocName(altLang));
@@ -356,12 +356,12 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			}
 		}
 
-		public ImageBrush Background
+		public DrawingBrush Background
 		{
 			get
 			{
 				if(Id == null || Name == null)
-					return new ImageBrush();
+					return new DrawingBrush();
 				var cardImageObj = new CardImageObject(this);
 				Dictionary<int, CardImageObject> cache;
 				if(CardImageCache.TryGetValue(Id, out cache))
@@ -373,6 +373,8 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 				try
 				{
 					var image = ThemeManager.GetBarImageBuilder(this).Build();
+					if (image.CanFreeze)
+						image.Freeze();
 					cardImageObj = new CardImageObject(image, this);
 					if(cache == null)
 					{
@@ -385,7 +387,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 				catch(Exception ex)
 				{
 					Log.Error($"Image builder failed: {ex.Message}");
-					return new ImageBrush();
+					return new DrawingBrush();
 				}
 			}
 		}
@@ -473,7 +475,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 
 	internal class CardImageObject
 	{
-		public ImageBrush Image { get; }
+		public DrawingBrush Image { get; }
 		public int Count { get; }
 		public bool Jousted { get; }
 		public bool ColoredFrame { get; }
@@ -482,7 +484,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 		public string Theme { get; }
 		public int TextColorHash { get; }
 
-		public CardImageObject(ImageBrush image, Card card) : this(card)
+		public CardImageObject(DrawingBrush image, Card card) : this(card)
 		{
 			Image = image;
 		}

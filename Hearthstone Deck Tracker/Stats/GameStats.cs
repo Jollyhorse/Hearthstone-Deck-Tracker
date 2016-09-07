@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -12,12 +11,13 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
+using HearthMirror.Objects;
 using Hearthstone_Deck_Tracker.Annotations;
 using Hearthstone_Deck_Tracker.Enums;
-using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker.Utility;
 using Hearthstone_Deck_Tracker.Utility.Logging;
-using static Hearthstone_Deck_Tracker.Enums.PlayType;
+using Card = Hearthstone_Deck_Tracker.Hearthstone.Card;
+using Deck = Hearthstone_Deck_Tracker.Hearthstone.Deck;
 
 #endregion
 
@@ -41,8 +41,10 @@ namespace Hearthstone_Deck_Tracker.Stats
 		private string _playerName;
 		private string _opponentName;
 		private int _rank;
+		private int _stars;
 		private int _legendRank;
 		private Region _region;
+		private int _opponentLegendRank;
 
 		public GameStats()
 		{
@@ -157,9 +159,21 @@ namespace Hearthstone_Deck_Tracker.Stats
 		public int Rank
 		{
 			get { return _rank; }
-			set { _rank = value;
+			set
+			{
+				_rank = value;
 				OnPropertyChanged();
 				OnPropertyChanged(nameof(RankString));
+			}
+		}
+
+		public int Stars
+		{
+			get { return _stars; }
+			set
+			{
+				_stars = value;
+				OnPropertyChanged();
 			}
 		}
 
@@ -172,7 +186,27 @@ namespace Hearthstone_Deck_Tracker.Stats
 			}
 		}
 
+		public int OpponentLegendRank
+		{
+			get { return _opponentLegendRank; }
+			set
+			{
+				_opponentLegendRank = value;
+				OnPropertyChanged();
+			}
+		}
+
 		public int OpponentRank { get; set; }
+
+		public int PlayerCardbackId { get; set; }
+
+		public int OpponentCardbackId { get; set; }
+
+		public int FriendlyPlayerId { get; set; }
+
+		public int ScenarioId { get; set; }
+
+		public GameServerInfo ServerInfo { get; set; }
 
 		public Region Region
 		{
@@ -290,6 +324,9 @@ namespace Hearthstone_Deck_Tracker.Stats
 
 		[XmlIgnore]
 		public bool CanGetOpponentDeck => OpponentCards.Any();
+
+		[XmlIgnore]
+		public bool CanSelectDeck => DeckList.Instance.Decks.Any(d => d.DeckId == DeckId);
 
 		[XmlIgnore]
 		public BitmapImage OpponentHeroImage
@@ -441,10 +478,17 @@ namespace Hearthstone_Deck_Tracker.Stats
 		public bool ShouldSerializePlayerCards() => PlayerCards.Any();
 		public bool ShouldSerializeOpponentCards() => OpponentCards.Any();
 		public bool ShouldSerializeRank() => Rank > 0;
+		public bool ShouldSerializeStars() => Stars > 0;
 		public bool ShouldSerializeLegendRank() => LegendRank > 0;
 		public bool ShouldSerializeOpponentRank() => OpponentRank > 0;
+		public bool ShouldSerializeOpponentLegendRank() => OpponentLegendRank > 0;
 		public bool ShouldSerializeRegion() => Region != Region.UNKNOWN;
 		public bool ShouldSerializeIsClone() => IsClone;
+		public bool ShouldSerializePlayerCardbackId() => PlayerCardbackId > 0;
+		public bool ShouldSerializeOpponentCardbackId() => OpponentCardbackId > 0;
+		public bool ShouldSerializeFriendlyPlayerId() => FriendlyPlayerId > 0;
+		public bool ShouldSerializeScenarioId() => ScenarioId > 0;
+		public bool ShouldSerializeServerInfo() => ServerInfo != null;
 
 		#region Obsolete
 

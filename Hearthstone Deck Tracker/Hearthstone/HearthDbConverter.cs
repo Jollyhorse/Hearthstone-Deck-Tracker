@@ -1,8 +1,11 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using HearthDb.Enums;
+using Hearthstone_Deck_Tracker.Enums;
+using static HearthDb.Enums.BnetGameType;
 
 #endregion
 
@@ -28,13 +31,25 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			{17, "Hero Skins"},
 			{18, "Tavern Brawl"},
 			{20, "League of Explorers"},
-			{21, "Whispers of the Old Gods"}
+			{21, "Whispers of the Old Gods"},
+			{23, "One Night in Karazhan"}
 		};
 
 		public static string ConvertClass(CardClass cardClass) => (int)cardClass < 2 || (int)cardClass > 10
 																	  ? null : CultureInfo.InvariantCulture.TextInfo.ToTitleCase(cardClass.ToString().ToLowerInvariant());
 
-		public static string CardTypeConverter(CardType type) => type == CardType.HERO_POWER ? "Hero Power" : CultureInfo.InvariantCulture.TextInfo.ToTitleCase(type.ToString().ToLowerInvariant().Replace("_", ""));
+		public static string CardTypeConverter(CardType type)
+		{
+			switch(type)
+			{
+				case CardType.ABILITY:
+					return "Spell";
+				case CardType.HERO_POWER:
+					return "Hero Power";
+				default:
+					return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(type.ToString().ToLowerInvariant());
+			}
+		}
 
 
 		public static string RaceConverter(Race race)
@@ -57,6 +72,61 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			string str;
 			SetDict.TryGetValue((int)set, out str);
 			return str;
+		}
+
+		public static GameMode GetGameMode(GameType gameType)
+		{
+			switch(gameType)
+			{
+				case GameType.GT_VS_AI:
+					return GameMode.Practice;
+				case GameType.GT_VS_FRIEND:
+					return GameMode.Friendly;
+				case GameType.GT_ARENA:
+					return GameMode.Arena;
+				case GameType.GT_RANKED:
+					return GameMode.Ranked;
+				case GameType.GT_CASUAL:
+					return GameMode.Casual;
+				case GameType.GT_TAVERNBRAWL:
+				case GameType.GT_TB_2P_COOP:
+					return GameMode.Brawl;
+				default:
+					return GameMode.None;
+			}
+		}
+		public static BnetGameType GetGameType(GameMode mode, Format? format)
+		{
+			switch(mode)
+			{
+			case GameMode.Arena:
+				return BGT_ARENA;
+			case GameMode.Ranked:
+				return format == Format.Standard ? BGT_RANKED_STANDARD : BGT_RANKED_WILD;
+			case GameMode.Casual:
+				return format == Format.Standard ? BGT_CASUAL_STANDARD : BGT_CASUAL_WILD;
+			case GameMode.Brawl:
+				return BGT_TAVERNBRAWL_PVP;
+			case GameMode.Friendly:
+				return BGT_FRIENDS;
+			case GameMode.Practice:
+				return BGT_VS_AI;
+			default:
+				return BGT_UNKNOWN;
+			}
+		}
+
+		public static Format? GetFormat(FormatType format)
+		{
+			switch(format)
+			{
+				case FormatType.FT_WILD:
+					return Format.Wild;
+				case FormatType.FT_STANDARD:
+					return Format.Standard;
+				default:
+					return null;
+			}
 		}
 	}
 }

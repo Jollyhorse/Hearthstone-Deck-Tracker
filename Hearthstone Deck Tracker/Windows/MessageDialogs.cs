@@ -1,12 +1,14 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using HearthDb.Enums;
 using Hearthstone_Deck_Tracker.Enums;
 using Hearthstone_Deck_Tracker.FlyoutControls;
 using Hearthstone_Deck_Tracker.Hearthstone;
@@ -16,7 +18,6 @@ using Hearthstone_Deck_Tracker.Utility.Extensions;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
-using Microsoft.Win32;
 using static System.StringComparison;
 using static MahApps.Metro.Controls.Dialogs.MessageDialogStyle;
 
@@ -40,6 +41,16 @@ namespace Hearthstone_Deck_Tracker.Windows
 							new Settings {AffirmativeButtonText = "Show update notes", NegativeButtonText = "Close"});
 			if(result == MessageDialogResult.Affirmative)
 				Helper.TryOpenUrl(@"https://github.com/HearthSim/Hearthstone-Deck-Tracker/releases");
+		}
+
+		public static async void ShowRestartDialog()
+		{
+			var result =
+				await Core.MainWindow.ShowMessageAsync("Restart required.", "HDT needs to be restarted for the changes to take effect.",
+					MessageDialogStyle.AffirmativeAndNegative,
+					new MessageDialogs.Settings() { AffirmativeButtonText = "Restart Now", NegativeButtonText = "Later" });
+			if(result == MessageDialogResult.Affirmative)
+				Core.MainWindow.Restart();
 		}
 
 		public static async Task ShowMessage(this MetroWindow window, string title, string message) => await window.ShowMessageAsync(title, message);
@@ -114,27 +125,29 @@ namespace Hearthstone_Deck_Tracker.Windows
 			}
 			var message = "The following cards were not found:\n";
 			var totalDust = 0;
-			var sets = new string[5];
+			var sets = new List<string>();
 			foreach(var card in deck.MissingCards)
 			{
 				message += "\n• " + card.LocalizedName;
 				if(card.Count == 2)
 					message += " x2";
 
-				if(card.Set.Equals("CURSE OF NAXXRAMAS", CurrentCultureIgnoreCase))
-					sets[0] = "and the Naxxramas DLC ";
-				else if(card.Set.Equals("PROMOTION", CurrentCultureIgnoreCase))
-					sets[1] = "and Promotion cards ";
-				else if(card.Set.Equals("REWARD", CurrentCultureIgnoreCase))
-					sets[2] = "and the Reward cards ";
-				else if(card.Set.Equals("BLACKROCK MOUNTAIN", CurrentCultureIgnoreCase))
-					sets[3] = "and the Blackrock Mountain DLC ";
-				else if(card.Set.Equals("LEAGUE OF EXPLORERS", CurrentCultureIgnoreCase))
-					sets[4] = "and the League of Explorers DLC ";
+				if(card.Set == HearthDbConverter.SetConverter(CardSet.NAXX))
+					sets.Add("and the Naxxramas DLC ");
+				else if(card.Set == HearthDbConverter.SetConverter(CardSet.PROMO))
+					sets.Add("and Promotion cards ");
+				else if(card.Set == HearthDbConverter.SetConverter(CardSet.REWARD))
+					sets.Add("and the Reward cards ");
+				else if(card.Set == HearthDbConverter.SetConverter(CardSet.BRM))
+					sets.Add("and the Blackrock Mountain DLC ");
+				else if(card.Set == HearthDbConverter.SetConverter(CardSet.LOE))
+					sets.Add("and the League of Explorers DLC ");
+				else if(card.Set == HearthDbConverter.SetConverter(CardSet.KARA))
+					sets.Add("and the One Night in Karazhan DLC ");
 				else
 					totalDust += card.DustCost * card.Count;
 			}
-			message += $"\n\nYou need {totalDust} dust {string.Join("", sets)}to craft the missing cards.";
+			message += $"\n\nYou need {totalDust} dust {string.Join("", sets.Distinct())}to craft the missing cards.";
 			await window.ShowMessageAsync("Export incomplete", message, Affirmative, new Settings {AffirmativeButtonText = "OK"});
 		}
 
@@ -159,6 +172,15 @@ namespace Hearthstone_Deck_Tracker.Windows
 			DeckStatsList.Save();
 			Core.MainWindow.DeckPickerList.UpdateDecks(forceUpdate: new[] {deck});
 			return true;
+		}
+
+		public static async Task<DeckType?> ShowDeckTypeDialog(this MetroWindow window)
+		{
+			var dialog = new DeckTypeDialog();
+			await window.ShowMetroDialogAsync(dialog);
+			var type = await dialog.WaitForButtonPressAsync();
+			await window.HideMetroDialogAsync(dialog);
+			return type;
 		}
 
 		public static async Task<bool> ShowEditGameDialog(this MetroWindow window, GameStats game)
@@ -212,6 +234,34 @@ namespace Hearthstone_Deck_Tracker.Windows
 											NegativeButtonText = Helper.LanguageDict.First(x => x.Value == Config.Instance.SelectedLanguage).Key
 										}) == MessageDialogResult.Affirmative;
 			return english;
+		}
+
+		private static bool _awaitingMainWindowOpen;
+		public static async void ShowNewArenaDeckMessageAsync(this MetroWindow window, HearthMirror.Objects.Deck deck)
+		{
+			if(_awaitingMainWindowOpen)
+				return;
+			_awaitingMainWindowOpen = true;
+
+			if(window.WindowState == WindowState.Minimized)
+				Core.TrayIcon.ShowMessage("New arena deck detected!");
+
+			while(window.Visibility != Visibility.Visible || window.WindowState == WindowState.Minimized)
+				await Task.Delay(100);
+
+			var result = await window.ShowMessageAsync("New arena deck detected!",
+												 "You can change this behaviour to \"auto save&import\" or \"manual\" in [options > tracker > importing]",
+												 AffirmativeAndNegative, new Settings { AffirmativeButtonText = "Import", NegativeButtonText = "Cancel" });
+
+			if(result == MessageDialogResult.Affirmative)
+			{
+				Log.Info("...saving new arena deck.");
+				Core.MainWindow.ImportArenaDeck(deck);
+			}
+			else
+				Log.Info("...discarded by user.");
+			Core.Game.IgnoredArenaDecks.Add(deck.Id);
+			_awaitingMainWindowOpen = false;
 		}
 
 		public class Settings : MetroDialogSettings

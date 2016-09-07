@@ -58,43 +58,117 @@
     <ApplicationIcon>Images\HearthstoneDeckTracker.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Squirrel|AnyCPU'">
+    <OutputPath>bin\Squirrel\</OutputPath>
+    <DefineConstants>TRACE;SQUIRREL</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>6</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Squirrel|x86'">
+    <OutputPath>bin\x86\Squirrel\</OutputPath>
+    <DefineConstants>TRACE;SQUIRREL</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
-    <Reference Include="AForge, Version=2.2.5.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb, processorArchitecture=MSIL">
-      <HintPath>..\packages\AForge.2.2.5\lib\AForge.dll</HintPath>
+    <Reference Include="DeltaCompressionDotNet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1d14d6e5194e7f4a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DeltaCompressionDotNet.1.0.0\lib\net45\DeltaCompressionDotNet.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="AForge.Imaging, Version=2.2.5.0, Culture=neutral, PublicKeyToken=ba8ddea9676ca48b, processorArchitecture=MSIL">
-      <HintPath>..\packages\AForge.Imaging.2.2.5\lib\AForge.Imaging.dll</HintPath>
+    <Reference Include="DeltaCompressionDotNet.MsDelta, Version=1.0.0.0, Culture=neutral, PublicKeyToken=46b2138a390abf55, processorArchitecture=MSIL">
+      <HintPath>..\packages\DeltaCompressionDotNet.1.0.0\lib\net45\DeltaCompressionDotNet.MsDelta.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="AForge.Math, Version=2.2.5.0, Culture=neutral, PublicKeyToken=abba2e25397ee8c9, processorArchitecture=MSIL">
-      <HintPath>..\packages\AForge.Math.2.2.5\lib\AForge.Math.dll</HintPath>
+    <Reference Include="DeltaCompressionDotNet.PatchApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3e8888ee913ed789, processorArchitecture=MSIL">
+      <HintPath>..\packages\DeltaCompressionDotNet.1.0.0\lib\net45\DeltaCompressionDotNet.PatchApi.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Garlic">
-      <HintPath>..\packages\Garlic.2.1.0.0\lib\net35\Garlic.dll</HintPath>
     </Reference>
     <Reference Include="De.TorstenMandelkow.MetroChart, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\De.TorstenMandelkow.MetroChart.dll</HintPath>
     </Reference>
-    <Reference Include="HearthDb">
-      <HintPath>..\lib\HearthDb.dll</HintPath>
-    </Reference>
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\squirrel.windows.1.4.2\lib\Net45\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="MahApps.Metro, Version=1.1.2.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\MahApps.Metro.1.1.2.0\lib\net45\MahApps.Metro.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Mdb.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Pdb.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Rocks.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NuGet.Squirrel, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\squirrel.windows.1.4.2\lib\Net45\NuGet.Squirrel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="PresentationUI, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="ReachFramework" />
+    <Reference Include="SharpRaven, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpRaven.2.1.0\lib\net45\SharpRaven.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Splat, Version=1.6.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Splat.1.6.2\lib\Net45\Splat.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Squirrel, Version=1.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\squirrel.windows.1.4.2\lib\Net45\Squirrel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -133,6 +207,7 @@
     <Compile Include="API\GameEvents.cs" />
     <Compile Include="API\LogEvents.cs" />
     <Compile Include="API\Overlay.cs" />
+    <Compile Include="API\PredamageInfo.cs" />
     <Compile Include="Controls\AnimatedCard.xaml.cs">
       <DependentUpon>AnimatedCard.xaml</DependentUpon>
     </Compile>
@@ -151,6 +226,9 @@
     <Compile Include="Controls\ChartWinsByClass.xaml.cs">
       <DependentUpon>ChartWinsByClass.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\DeckImportingControl.xaml.cs">
+      <DependentUpon>DeckImportingControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\DeckPicker\DateConverter.cs" />
     <Compile Include="Controls\DeckPicker\DeckPickerClassItem.xaml.cs">
       <DependentUpon>DeckPickerClassItem.xaml</DependentUpon>
@@ -167,6 +245,9 @@
     <Compile Include="Controls\DeckPicker\DeckPickerItemLayouts\DeckPickerItemLayoutMinimal.xaml.cs">
       <DependentUpon>DeckPickerItemLayoutMinimal.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\DeckSetIcons.xaml.cs">
+      <DependentUpon>DeckSetIcons.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\DeckVersionChange.xaml.cs">
       <DependentUpon>DeckVersionChange.xaml</DependentUpon>
     </Compile>
@@ -177,6 +258,9 @@
       <DependentUpon>ElementSorterItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DeckPicker\MarginConverter.cs" />
+    <Compile Include="Controls\Information\SquirrelInfo.xaml.cs">
+      <DependentUpon>SquirrelInfo.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Overlay\WotogCounter.xaml.cs">
       <DependentUpon>WotogCounter.xaml</DependentUpon>
     </Compile>
@@ -292,6 +376,7 @@
     <Compile Include="Enums\TagFilterOperation.cs" />
     <Compile Include="Enums\TimeFrame.cs" />
     <Compile Include="Enums\YesNo.cs" />
+    <Compile Include="Importing\Game\ImportOptions\ExistingDeck.cs" />
     <Compile Include="Exporting\ExportingActions.cs" />
     <Compile Include="Exporting\ExportingHelper.cs" />
     <Compile Include="Exporting\ExportingInfo.cs" />
@@ -303,26 +388,46 @@
       <DependentUpon>OptionsSearch.xaml</DependentUpon>
     </Compile>
     <Compile Include="FlyoutControls\Options\AdvancedOptions.cs" />
+    <Compile Include="FlyoutControls\Options\Overlay\OverlayStreaming.xaml.cs">
+      <DependentUpon>OverlayStreaming.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FlyoutControls\Options\Tracker\TrackerNotifications.xaml.cs">
       <DependentUpon>TrackerNotifications.xaml</DependentUpon>
     </Compile>
     <Compile Include="DeckManager.cs" />
     <Compile Include="Hearthstone\DeckState.cs" />
     <Compile Include="Hearthstone\PredictedCard.cs" />
+    <Compile Include="Importing\Game\ImportOptions\IImportOption.cs" />
+    <Compile Include="Importing\MetaTagImporter.cs" />
     <Compile Include="Importing\Websites\Manacrystals.cs" />
+    <Compile Include="Importing\Websites\Marduktv.cs" />
+    <Compile Include="Importing\Websites\Powned.cs" />
     <Compile Include="LogReader\Handlers\FullScreenFxHandler.cs" />
+    <Compile Include="Importing\Game\ImportOptions\NewDeck.cs" />
+    <Compile Include="Importing\Game\ImportedDeck.cs" />
     <Compile Include="Stats\CompiledStats\ConstructedDeckDetails.cs" />
     <Compile Include="Stats\CompiledStats\ConstructedDeckStats.cs" />
     <Compile Include="Stats\CompiledStats\ConstructedMatchup.cs" />
     <Compile Include="Stats\TrackedCard.cs" />
+    <Compile Include="Utility\Analytics\Influx.cs" />
+    <Compile Include="Utility\Analytics\InfluxPoint.cs" />
+    <Compile Include="Utility\Analytics\InfluxPointBuilder.cs" />
+    <Compile Include="Utility\Exceptions\ExportingInterruptedException.cs" />
+    <Compile Include="Utility\ResourceMonitor.cs" />
+    <Compile Include="Utility\Updating\ReleaseUrls.cs" />
+    <Compile Include="Utility\Updating\StatusBarHelper.cs" />
+    <Compile Include="Windows\CrashDialog.xaml.cs">
+      <DependentUpon>CrashDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Utility\Extensions\BitmapExtensions.cs" />
     <Compile Include="Utility\Extensions\GroupingExtensions.cs" />
     <Compile Include="Utility\Extensions\RectExtensions.cs" />
+    <Compile Include="Utility\GaussianBlur.cs" />
     <Compile Include="Utility\Themes\CardBarImageBuilder.cs" />
     <Compile Include="Hearthstone\GameTime.cs" />
     <Compile Include="Hearthstone\HearthDbConverter.cs" />
     <Compile Include="Hearthstone\GameMetaData.cs" />
     <Compile Include="LogReader\Handlers\LoadingScreenHandler.cs" />
-    <Compile Include="LogReader\Handlers\NetHandler.cs" />
     <Compile Include="Enums\Hearthstone\Mode.cs" />
     <Compile Include="LogReader\Handlers\TagChangeActions.cs" />
     <Compile Include="LogReader\LogReaderHelper.cs" />
@@ -342,7 +447,7 @@
     <Compile Include="Utility\BoardDamage\PlayerBoard.cs" />
     <Compile Include="Importing\ImportingHelper.cs" />
     <Compile Include="Importing\Websites\Arenavalue.cs" />
-    <Compile Include="Importing\Websites\Elitedecks.cs" />
+    <Compile Include="Importing\Websites\EliteHearthstone.cs" />
     <Compile Include="Importing\Websites\Heartharena.cs" />
     <Compile Include="Importing\Websites\Hearthbuilder.cs" />
     <Compile Include="Importing\Websites\Hearthhead.cs" />
@@ -426,17 +531,12 @@
     <Compile Include="FlyoutControls\UpdateNotes.xaml.cs">
       <DependentUpon>UpdateNotes.xaml</DependentUpon>
     </Compile>
-    <Compile Include="HearthStats\Controls\DuplicateMatchesWindow.xaml.cs">
-      <DependentUpon>DuplicateMatchesWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Hearthstone\Database.cs" />
     <Compile Include="Hearthstone\GameV2.cs" />
     <Compile Include="Hearthstone\IGame.cs" />
     <Compile Include="Hearthstone\Mechanic.cs" />
     <Compile Include="Hearthstone\Player.cs" />
     <Compile Include="LogReader\Handlers\ArenaHandler.cs" />
-    <Compile Include="LogReader\Handlers\AssetHandler.cs" />
-    <Compile Include="LogReader\Handlers\BobHandler.cs" />
     <Compile Include="LogReader\Handlers\PowerHandler.cs" />
     <Compile Include="LogReader\HsGameState.cs" />
     <Compile Include="LogReader\HsLogReaderConstants.cs" />
@@ -454,13 +554,9 @@
     <Compile Include="Plugins\PluginSettings.cs" />
     <Compile Include="Plugins\PluginWrapper.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="Protocol\JsonCard.cs" />
-    <Compile Include="Protocol\JsonDeck.cs" />
-    <Compile Include="Protocol\JsonDecksWrapper.cs" />
     <Compile Include="Replay\TurnViewItem.cs" />
     <Compile Include="Stats\CompiledStats\ArenaStats.cs" />
     <Compile Include="Utility\ConfigWrapper.cs" />
-    <Compile Include="Utility\RankDetection.cs" />
     <Compile Include="Utility\ScreenCapture.cs" />
     <Compile Include="Utility\Themes\CardTextImageBuilder.cs" />
     <Compile Include="Utility\Themes\ClassicImageBuilder.cs" />
@@ -474,7 +570,7 @@
     <Compile Include="Windows\ArenaRewardDialog.xaml.cs">
       <DependentUpon>ArenaRewardDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Utility\Analytics.cs" />
+    <Compile Include="Utility\Analytics\Sentry.cs" />
     <Compile Include="Utility\HotKeys\HotKey.cs" />
     <Compile Include="Utility\HotKeys\PredefinedHotKeyActionAttribute.cs" />
     <Compile Include="Utility\HotKeys\HotKeyConfig.cs" />
@@ -483,6 +579,15 @@
     <Compile Include="Utility\HotKeys\KeyPressedEventArgs.cs" />
     <Compile Include="Utility\HotKeys\ModifierKeys.cs" />
     <Compile Include="Utility\HotKeys\PredefinedHotKeyActions.cs" />
+    <Compile Include="Windows\CapturableOverlayWindow.xaml.cs">
+      <DependentUpon>CapturableOverlayWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DeckView.xaml.cs">
+      <DependentUpon>DeckView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\DeckTypeDialog.xaml.cs">
+      <DependentUpon>DeckTypeDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\GameResultNotificationWindow.xaml.cs">
       <DependentUpon>GameResultNotificationWindow.xaml</DependentUpon>
     </Compile>
@@ -491,7 +596,6 @@
     </Compile>
     <Compile Include="TrayIcon.cs" />
     <Compile Include="Utility\BackupManager.cs" />
-    <Compile Include="Protocol\PipeServer.cs" />
     <Compile Include="Utility\ConfigManager.cs" />
     <Compile Include="Utility\DataIssueResolver.cs" />
     <Compile Include="Utility\ImageCache.cs" />
@@ -500,7 +604,7 @@
     <Compile Include="Utility\Markdown.Xaml\TextToFlowDocumentConverter.cs" />
     <Compile Include="Utility\NetDeck.cs" />
     <Compile Include="Utility\NewsUpdater.cs" />
-    <Compile Include="Utility\Updater.cs" />
+    <Compile Include="Utility\Updating\Updater.cs" />
     <Compile Include="Windows\AddGameDialog.xaml.cs">
       <DependentUpon>AddGameDialog.xaml</DependentUpon>
     </Compile>
@@ -688,6 +792,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Controls\DeckImportingControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\DeckPicker\DeckPickerClassItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -708,6 +816,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\DeckSetIcons.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\DeckVersionChange.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -717,6 +829,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ElementSorterItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Information\SquirrelInfo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -844,6 +960,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="FlyoutControls\Options\Overlay\OverlayStreaming.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="FlyoutControls\Options\Tracker\TrackerAppearance.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -912,11 +1032,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="HearthStats\Controls\DuplicateMatchesWindow.xaml">
+    <Page Include="Windows\CrashDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\ArenaRewardDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\CapturableOverlayWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\DeckView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\DeckTypeDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1055,6 +1187,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Utility\Updating\Updater.Squirrel.cs" />
+    <Compile Include="Utility\Updating\Updater.Default.cs" />
     <Resource Include="Resources\Chunkfive.otf" />
     <Resource Include="HearthStats\Resources\hearthstats_logo.png" />
     <Resource Include="Resources\SplashScreen.png" />
@@ -1068,31 +1202,6 @@
     <Resource Include="Images\gold_progress_frame_center.png" />
     <Resource Include="Images\gold_progress_frame_left.png" />
     <Resource Include="Images\gold_progress_frame_right.png" />
-    <Resource Include="Resources\Ranks\1.bmp" />
-    <Resource Include="Resources\Ranks\10.bmp" />
-    <Resource Include="Resources\Ranks\11.bmp" />
-    <Resource Include="Resources\Ranks\12.bmp" />
-    <Resource Include="Resources\Ranks\13.bmp" />
-    <Resource Include="Resources\Ranks\14.bmp" />
-    <Resource Include="Resources\Ranks\15.bmp" />
-    <Resource Include="Resources\Ranks\16.bmp" />
-    <Resource Include="Resources\Ranks\17.bmp" />
-    <Resource Include="Resources\Ranks\18.bmp" />
-    <Resource Include="Resources\Ranks\19.bmp" />
-    <Resource Include="Resources\Ranks\2.bmp" />
-    <Resource Include="Resources\Ranks\20.bmp" />
-    <Resource Include="Resources\Ranks\21.bmp" />
-    <Resource Include="Resources\Ranks\22.bmp" />
-    <Resource Include="Resources\Ranks\23.bmp" />
-    <Resource Include="Resources\Ranks\24.bmp" />
-    <Resource Include="Resources\Ranks\25.bmp" />
-    <Resource Include="Resources\Ranks\3.bmp" />
-    <Resource Include="Resources\Ranks\4.bmp" />
-    <Resource Include="Resources\Ranks\5.bmp" />
-    <Resource Include="Resources\Ranks\6.bmp" />
-    <Resource Include="Resources\Ranks\7.bmp" />
-    <Resource Include="Resources\Ranks\8.bmp" />
-    <Resource Include="Resources\Ranks\9.bmp" />
     <Content Include="Images\HearthstoneDeckTracker.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1171,10 +1280,8 @@
     <Resource Include="Images\icon-cthun-spells.png" />
     <Resource Include="Images\icon-cthun.png" />
     <Resource Include="Images\icon-spells.png" />
-    <Content Include="Version.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
+    <Resource Include="Resources\embroidery.png" />
+    <Resource Include="Resources\tactile_noise.png" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -1210,44 +1317,59 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HDTHelper\HDTHelper.csproj">
-      <Project>{a2a7984f-d059-4259-bcb7-b63828f03c50}</Project>
-      <Name>HDTHelper</Name>
+    <ProjectReference Include="..\HearthDb\HearthDb\HearthDb.csproj">
+      <Project>{7ed14243-e02b-4b94-af00-a67a62c282f0}</Project>
+      <Name>HearthDb</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HearthMirror\HearthMirror\HearthMirror.csproj">
+      <Project>{1694a2f8-645a-4263-a6ab-fc26323fd675}</Project>
+      <Name>HearthMirror</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if "$(ConfigurationName)" == "Release" (
+    <PostBuildEvent>if "$(ConfigurationName)" == "Squirrel" (
+    rmdir /S /Q "..\Squirrel-Clean"
+    mkdir "..\SquirrelNu"
+    mkdir "..\Squirrel-Clean"
+    mkdir "..\Squirrel-Clean/Images"
+    xcopy /E /Y /Q "Images\*.*" "..\Squirrel-Clean\Images"
+    xcopy /Y "HearthstoneDeckTracker.exe" "..\Squirrel-Clean"
+    xcopy /Y "HearthstoneDeckTracker.exe.config" "..\Squirrel-Clean"
+    xcopy /Y "*.dll" "..\Squirrel-Clean"	
+)
+if "$(ConfigurationName)" == "Release" (
     rmdir /S /Q "..\Hearthstone Deck Tracker"
     mkdir "..\Hearthstone Deck Tracker"
     mkdir "..\Hearthstone Deck Tracker/Images"
-    mkdir "..\Hearthstone Deck Tracker/Plugins"
-    xcopy /E /Y "Images\*.*" "..\Hearthstone Deck Tracker\Images"
+    xcopy /E /Y /Q "Images\*.*" "..\Hearthstone Deck Tracker\Images"
     xcopy /Y "HearthstoneDeckTracker.exe" "..\Hearthstone Deck Tracker"
     xcopy /Y "HearthstoneDeckTracker.exe.config" "..\Hearthstone Deck Tracker"
     ren "..\Hearthstone Deck Tracker\HearthstoneDeckTracker.exe" "Hearthstone Deck Tracker.exe"
     ren "..\Hearthstone Deck Tracker\HearthstoneDeckTracker.exe.config" "Hearthstone Deck Tracker.exe.config"
-    xcopy /Y "AForge.dll" "..\Hearthstone Deck Tracker"
-    xcopy /Y "AForge.Math.dll" "..\Hearthstone Deck Tracker"
-    xcopy /Y "AForge.Imaging.dll" "..\Hearthstone Deck Tracker"
-    xcopy /Y "Garlic.dll" "..\Hearthstone Deck Tracker"
-    xcopy /Y "HearthDb.dll" "..\Hearthstone Deck Tracker"
-    xcopy /Y "De.TorstenMandelkow.MetroChart.dll" "..\Hearthstone Deck Tracker"
-    xcopy /Y "HtmlAgilityPack.dll" "..\Hearthstone Deck Tracker"
-    xcopy /Y "MahApps.Metro.dll" "..\Hearthstone Deck Tracker"
-    xcopy /Y "Newtonsoft.Json.dll" "..\Hearthstone Deck Tracker"
-    xcopy /Y "System.Windows.Interactivity.dll" "..\Hearthstone Deck Tracker"
-    xcopy /Y "Version.xml" "..\Hearthstone Deck Tracker"
-    xcopy /Y "..\..\..\HDTUpdate\bin\Release\HDTUpdate.exe" "..\Hearthstone Deck Tracker"
-    xcopy /Y "..\..\..\HDTHelper\bin\Release\HDTHelper.exe" "..\Hearthstone Deck Tracker"
-    xcopy /Y "..\..\..\HDTUninstaller\bin\Release\HDTUninstaller.exe" "..\Hearthstone Deck Tracker" )</PostBuildEvent>
+    xcopy /Y "*.dll" "..\Hearthstone Deck Tracker"
+    xcopy /Y "..\..\..\..\HDTUpdate\bin\Release\HDTUpdate.exe" "..\Hearthstone Deck Tracker"
+    xcopy /Y "..\..\..\..\HDTUninstaller\bin\Release\HDTUninstaller.exe" "..\Hearthstone Deck Tracker"
+    signtool sign /tr http://timestamp.digicert.com /a /f "..\..\..\HearthSimCodeSigningCert.pfx" /p %25HearthSimCert%25 "..\Hearthstone Deck Tracker/\*.exe"
+)</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>mkdir "$(TargetDir)\Images\Bars"
+    <PreBuildEvent>if exist $(SolutionDir)HearthDb (
+  git -C $(SolutionDir)HearthDb fetch
+  git -C $(SolutionDir)HearthDb reset --hard origin/master
+) else (
+  git clone https://github.com/HearthSim/HearthDb.git $(SolutionDir)HearthDb
+)
+if exist $(SolutionDir)HearthMirror (
+  git -C $(SolutionDir)HearthMirror fetch
+  git -C $(SolutionDir)HearthMirror reset --hard origin/master
+) else (
+  git clone https://github.com/HearthSim/HearthMirror.git $(SolutionDir)HearthMirror 
+)
+mkdir "$(TargetDir)\Images\Bars"
 mkdir "$(TargetDir)\Images\Themes"
-xcopy /E /Y "$(ProjectDir)Images\Bars" "$(TargetDir)\Images\Bars"
-xcopy /E /Y "$(ProjectDir)Images\Themes" "$(TargetDir)\Images\Themes"</PreBuildEvent>
+xcopy /E /Y /Q "$(ProjectDir)Images\Bars" "$(TargetDir)\Images\Bars"
+xcopy /E /Y /Q "$(ProjectDir)Images\Themes" "$(TargetDir)\Images\Themes"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -1256,4 +1378,26 @@ xcopy /E /Y "$(ProjectDir)Images\Themes" "$(TargetDir)\Images\Themes"</PreBuildE
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="AfterBuild">
+    <CallTarget Condition=" '$(Configuration)' == 'Squirrel'" Targets="SquirrelAfterBuild"/>
+    <CallTarget Condition=" '$(Configuration)' == 'Release'" Targets="ReleaseAfterBuild"/>
+  </Target>
+  <Target Name="SquirrelAfterBuild">
+    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
+      <Output TaskParameter="Assemblies" ItemName="myAssemblyInfo" />
+    </GetAssemblyIdentity>
+    <Exec Command="nuget pack hdt.nuspec -Version %(myAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory ./bin/x86/SquirrelNu/" />
+    <Exec Command="Squirrel --releasify ./bin/x86/SquirrelNu/HearthstoneDeckTracker.%(myAssemblyInfo.Version).nupkg --setupIcon=bin\x86\Squirrel\Images\HearthstoneDeckTracker.ico --icon=bin\x86\Squirrel\Images\HearthstoneDeckTracker.ico --no-msi -n &quot;/tr http://timestamp.digicert.com /a /f HearthSimCodeSigningCert.pfx /p %HearthSimCert%&quot;" />
+  </Target>
+  <Target Name="ReleaseAfterBuild">
+    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
+      <Output TaskParameter="Assemblies" ItemName="myAssemblyInfo" />
+    </GetAssemblyIdentity>
+    <PropertyGroup>
+        <Regex>(\d+)\.(\d+)\.(\d+)(\.[1-9]\d*)?</Regex>
+        <Version>$([System.Text.RegularExpressions.Regex]::Match(%(myAssemblyInfo.Version), $(Regex)))</Version>
+    </PropertyGroup>
+    <Exec Command="if not exist Releases mkdir Releases" />
+    <Exec Command="cd bin/x86 &amp; zip -9 -r -q ../../Releases/Hearthstone.Deck.Tracker-v$(Version).zip &quot;Hearthstone Deck Tracker&quot;" />
+  </Target>
 </Project>

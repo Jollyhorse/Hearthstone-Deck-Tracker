@@ -1,5 +1,7 @@
 Hearthstone-Deck-Tracker
 ========================
+[![Build status](https://ci.appveyor.com/api/projects/status/3wow545sjaq9ybji/branch/master?svg=true)](https://ci.appveyor.com/project/Epix37/hearthstone-deck-tracker/branch/master)
+
 HDT is an automatic deck tracker and manager for Hearthstone.
 
 Installation
@@ -7,9 +9,7 @@ Installation
 - Requirements:
   - Windows Vista or higher
   - .NET Framework 4.5 or higher
-- [__Download__](https://github.com/HearthSim/Hearthstone-Deck-Tracker/releases) the `Hearthstone.Deck.Tracker-vx.xx.xx.zip` archive.
-- Extract the archive.
-- Run the "Hearthstone Deck Tracker.exe"
+- [Download and run the installer](https://hsdecktracker.net/download/).
  
 
 FAQ
@@ -48,7 +48,7 @@ The app:
 - The cards and timer can either be displayed in an overlay (see screenshot) or in **extra windows** (Options > General > Additional Windows)  
 - **Deck Manager**:
   - **Import** decks from websites: arenavalue, hearthstats, hearthpwn, hearthhead, hearthstoneplayers, tempostorm, hearthstonetopdeck and hearthnews  
-  - Circumvent the 9 deck limit: Saved decks can be **exported to Hearthstone**. (My Decks > More...)   
+  - Circumvent the 18 deck limit: Saved decks can be **exported to Hearthstone**. (My Decks > More...)
   - Decks can be filtered by custom **tags** and sorted by name, date and tags.  
   - Set **notes** for each deck (My Decks > More...)  
   - Create **screenshots** of decks (My Decks > More...)  
@@ -68,5 +68,6 @@ The app:
 ![Stats](http://i.imgur.com/tuxOFmg.png "Deck stats")
 
 
-Donations are always appreciated
-[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PZDMUT88NLFYJ)
+## License
+
+Copyright © HearthSim. All Rights Reserved.
