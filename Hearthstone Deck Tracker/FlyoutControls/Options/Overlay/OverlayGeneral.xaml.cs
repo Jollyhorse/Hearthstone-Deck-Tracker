@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Windows;
@@ -26,12 +26,9 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 		{
 			_game = game;
 			CheckboxHideOverlayInBackground.IsChecked = Config.Instance.HideInBackground;
-			CheckboxHideOpponentCardAge.IsChecked = Config.Instance.HideOpponentCardAge;
-			CheckboxHideOpponentCardMarks.IsChecked = Config.Instance.HideOpponentCardMarks;
 			CheckboxHideOverlayInMenu.IsChecked = Config.Instance.HideInMenu;
 			CheckboxHideOverlay.IsChecked = Config.Instance.HideOverlay;
 			CheckboxHideDecksInOverlay.IsChecked = Config.Instance.HideDecksInOverlay;
-			CheckboxHideSecrets.IsChecked = Config.Instance.HideSecrets;
 			CheckboxOverlaySecretToolTipsOnly.IsChecked = Config.Instance.OverlaySecretToolTipsOnly;
 			CheckboxHideOverlayInSpectator.IsChecked = Config.Instance.HideOverlayInSpectator;
 			CheckboxOverlayCardMarkToolTips.IsChecked = Config.Instance.OverlayCardMarkToolTips;
@@ -40,6 +37,8 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			CheckboxOverlayCardToolTips.IsChecked = Config.Instance.OverlayCardToolTips;
 			CheckboxOverlayAdditionalCardToolTips.IsEnabled = Config.Instance.OverlayCardToolTips;
 			CheckboxOverlayAdditionalCardToolTips.IsChecked = Config.Instance.AdditionalOverlayTooltips;
+			CheckboxOverlaySetToolTips.IsEnabled = Config.Instance.OverlayCardToolTips;
+			CheckboxOverlaySetToolTips.IsChecked = Config.Instance.OverlaySetToolTips;
 			CheckboxAutoGrayoutSecrets.IsChecked = Config.Instance.AutoGrayoutSecrets;
 			CheckboxKeepDecksVisible.IsChecked = Config.Instance.KeepDecksVisible;
 			CheckboxAlwaysShowGoldProgress.IsChecked = Config.Instance.AlwaysShowGoldProgress;
@@ -47,6 +46,8 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			CheckBoxBatteryStatusText.IsChecked = Config.Instance.ShowBatteryLifePercent;
 			CheckBoxFlavorText.IsChecked = Config.Instance.ShowFlavorText;
 			CheckBoxOverlayUseAnimations.IsChecked = Config.Instance.OverlayCardAnimations;
+			CheckBoxRemoveSecrets.IsChecked = Config.Instance.RemoveSecretsFromList;
+			CheckboxShowBattlegroundsTiers.IsChecked = Config.Instance.ShowBattlegroundsTiers;
 			_initialized = true;
 		}
 
@@ -70,6 +71,22 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			if(!_initialized)
 				return;
 			Config.Instance.AdditionalOverlayTooltips = false;
+			SaveConfig(false);
+		}
+
+		private void CheckboxOverlaySetToolTips_Checked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.OverlaySetToolTips = true;
+			SaveConfig(false);
+		}
+
+		private void CheckboxOverlaySetToolTips_Unchecked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.OverlaySetToolTips = false;
 			SaveConfig(false);
 		}
 
@@ -108,7 +125,7 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			Config.Instance.Reset(nameof(Config.TimersHorizontalPosition));
 			Config.Instance.Reset(nameof(Config.TimersHorizontalSpacing));
 
-			Config.Instance.Reset(nameof(Config.TimersHorizontalSpacing));
+			Config.Instance.Reset(nameof(Config.TimersVerticalPosition));
 			Config.Instance.Reset(nameof(Config.TimersVerticalSpacing));
 
 			Config.Instance.Reset(nameof(Config.SecretsTop));
@@ -136,6 +153,7 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			Config.Instance.OverlayCardToolTips = true;
 			CheckboxOverlayAdditionalCardToolTips.IsEnabled = true;
 			CheckboxOverlaySecretToolTipsOnly.IsEnabled = true;
+			CheckboxOverlaySetToolTips.IsEnabled = true;
 			SaveConfig(true);
 		}
 
@@ -148,6 +166,8 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			CheckboxOverlayAdditionalCardToolTips.IsEnabled = false;
 			CheckboxOverlaySecretToolTipsOnly.IsEnabled = false;
 			CheckboxOverlaySecretToolTipsOnly.IsChecked = false;
+			CheckboxOverlaySetToolTips.IsEnabled = false;
+			CheckboxOverlaySetToolTips.IsChecked = false;
 			SaveConfig(true);
 		}
 
@@ -165,25 +185,6 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 				return;
 			Config.Instance.HideDecksInOverlay = false;
 			SaveConfig(true);
-		}
-
-		private void CheckboxHideSecrets_Checked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized)
-				return;
-			Config.Instance.HideSecrets = true;
-			SaveConfig(false);
-			Core.Overlay.HideSecrets();
-		}
-
-		private void CheckboxHideSecrets_Unchecked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized)
-				return;
-			Config.Instance.HideSecrets = false;
-			SaveConfig(false);
-			if(!_game.IsInMenu)
-				Core.Overlay.ShowSecrets();
 		}
 
 		private void CheckboxOverlaySecretToolTipsOnly_Checked(object sender, RoutedEventArgs e)
@@ -250,6 +251,22 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			SaveConfig(true);
 		}
 
+		private void CheckboxShowBattlegroundsTiers_Checked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.ShowBattlegroundsTiers = true;
+			SaveConfig(true);
+		}
+
+		private void CheckboxShowBattlegroundsTiers_Unchecked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.ShowBattlegroundsTiers = false;
+			SaveConfig(true);
+		}
+
 		private void SliderOverlayOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			if(!_initialized)
@@ -287,38 +304,6 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			if(!_initialized)
 				return;
 			Config.Instance.HideInMenu = false;
-			SaveConfig(true);
-		}
-
-		private void CheckboxHideOpponentCardAge_Unchecked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized)
-				return;
-			Config.Instance.HideOpponentCardAge = false;
-			SaveConfig(true);
-		}
-
-		private void CheckboxHideOpponentCardAge_Checked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized)
-				return;
-			Config.Instance.HideOpponentCardAge = true;
-			SaveConfig(true);
-		}
-
-		private void CheckboxHideOpponentCardMarks_Unchecked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized)
-				return;
-			Config.Instance.HideOpponentCardMarks = false;
-			SaveConfig(true);
-		}
-
-		private void CheckboxHideOpponentCardMarks_Checked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized)
-				return;
-			Config.Instance.HideOpponentCardMarks = true;
 			SaveConfig(true);
 		}
 
@@ -452,6 +437,22 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			if(!_initialized)
 				return;
 			Config.Instance.OverlayCardAnimations = false;
+			Config.Save();
+		}
+
+		private void CheckBoxRemoveSecrets_Checked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.RemoveSecretsFromList = true;
+			Config.Save();
+		}
+
+		private void CheckBoxRemoveSecrets_Unchecked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.RemoveSecretsFromList = false;
 			Config.Save();
 		}
 	}

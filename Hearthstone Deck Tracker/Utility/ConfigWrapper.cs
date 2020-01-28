@@ -1,8 +1,9 @@
-﻿#region
+#region
 
 using System;
 using System.Text.RegularExpressions;
 using System.Windows;
+using Hearthstone_Deck_Tracker.Utility.Analytics;
 
 #endregion
 
@@ -10,6 +11,10 @@ namespace Hearthstone_Deck_Tracker.Utility
 {
 	public class ConfigWrapper
 	{
+		public static event Action ReplayAutoUploadChanged;
+		public static event Action CollectionSyncingChanged;
+		public static event Action IgnoreNewsIdChanged;
+
 		public static bool CardDbIncludeWildOnlyCards
 		{
 			get { return Config.Instance.CardDbIncludeWildOnlyCards; }
@@ -180,7 +185,114 @@ namespace Hearthstone_Deck_Tracker.Utility
 			}
 		}
 
-		public static Visibility ShowLastPlayedDateOnDeckVisibility => Config.Instance.ShowLastPlayedDateOnDeck ? Visibility.Visible : Visibility.Collapsed;
+		public static bool CollectionSyncingEnabled
+		{
+			get { return Config.Instance.SyncCollection; }
+			set
+			{
+				if(Config.Instance.SyncCollection != value)
+				{
+					Config.Instance.SyncCollection = value;
+					Config.Save();
+					Influx.OnCollectionSyncingEnabled(value);
+				}
+				CollectionSyncingChanged?.Invoke();
+			}
+		}
+
+		public static bool HsReplayAutoUpload
+		{
+			get { return Config.Instance.HsReplayAutoUpload; }
+			set
+			{
+				Config.Instance.HsReplayAutoUpload = value;
+				Config.Save();
+				Influx.OnHsReplayAutoUploadChanged(value);
+				ReplayAutoUploadChanged?.Invoke();
+			}
+		}
+
+		public static bool HsReplayUploadRanked
+		{
+			get { return Config.Instance.HsReplayUploadRanked; }
+			set
+			{
+				Config.Instance.HsReplayUploadRanked = value;
+				Config.Save();
+			}
+		}
+
+		public static bool HsReplayUploadCasual
+		{
+			get { return Config.Instance.HsReplayUploadCasual; }
+			set
+			{
+				Config.Instance.HsReplayUploadCasual = value;
+				Config.Save();
+			}
+		}
+
+		public static bool HsReplayUploadArena
+		{
+			get { return Config.Instance.HsReplayUploadArena; }
+			set
+			{
+				Config.Instance.HsReplayUploadArena = value;
+				Config.Save();
+			}
+		}
+
+		public static bool HsReplayUploadBrawl
+		{
+			get { return Config.Instance.HsReplayUploadBrawl; }
+			set
+			{
+				Config.Instance.HsReplayUploadBrawl = value;
+				Config.Save();
+			}
+		}
+
+		public static bool HsReplayUploadFriendly
+		{
+			get { return Config.Instance.HsReplayUploadFriendly; }
+			set
+			{
+				Config.Instance.HsReplayUploadFriendly = value;
+				Config.Save();
+			}
+		}
+
+		public static bool HsReplayUploadPractice
+		{
+			get { return Config.Instance.HsReplayUploadPractice; }
+			set
+			{
+				Config.Instance.HsReplayUploadPractice = value;
+				Config.Save();
+			}
+		}
+
+		public static bool HsReplayUploadSpectator
+		{
+			get { return Config.Instance.HsReplayUploadSpectator; }
+			set
+			{
+				Config.Instance.HsReplayUploadSpectator = value;
+				Config.Save();
+			}
+		}
+
+		public static bool HsReplayUploadBattlegrounds
+		{
+			get { return Config.Instance.HsReplayUploadBattlegrounds; }
+			set
+			{
+				Config.Instance.HsReplayUploadBattlegrounds = value;
+				Config.Save();
+			}
+		}
+
+		public static Visibility ShowDateOnDeckVisibility => Config.Instance.ShowDateOnDeck ? Visibility.Visible : Visibility.Collapsed;
 
 		public static Visibility UseButtonVisiblity => Config.Instance.AutoUseDeck ? Visibility.Collapsed : Visibility.Visible;
 
@@ -264,12 +376,45 @@ namespace Hearthstone_Deck_Tracker.Utility
 			}
 		}
 
+		public bool HsReplayShareToast
+		{
+			get { return Config.Instance.ShowReplayShareToast; }
+			set
+			{
+				Config.Instance.ShowReplayShareToast = value;
+				Config.Save();
+			}
+		}
+
+		public bool CheckForDevUpdates
+		{
+			get { return Config.Instance.CheckForDevUpdates; }
+			set
+			{
+				Config.Instance.CheckForDevUpdates = value;
+				Config.Instance.AllowDevUpdates = null;
+				Config.Save();
+			}
+		}
+
+		public static int IgnoreNewsId
+		{
+			get => Config.Instance.IgnoreNewsId;
+			set
+			{
+				Config.Instance.IgnoreNewsId = value;
+				Config.Save();
+				IgnoreNewsIdChanged?.Invoke();
+			}
+		}
+
+		public bool WindowCardToolTips => Config.Instance.WindowCardToolTips;
+
 		private static int? ValidateSeason(string value, bool allowEmpty)
 		{
 			if(allowEmpty && string.IsNullOrEmpty(value))
 				return null;
-			int season;
-			if(!int.TryParse(value, out season))
+			if(!int.TryParse(value, out var season))
 				throw new ApplicationException("Invalid season");
 			if(season < 1)
 				throw new ApplicationException("Invalid season. Minimum value: 1");
@@ -287,8 +432,7 @@ namespace Hearthstone_Deck_Tracker.Utility
 			if(!match.Success)
 				throw new ApplicationException("Invalid rank");
 			var legend = match.Groups["legend"].Success;
-			int rank;
-			if(int.TryParse(match.Groups["rank"].Value, out rank))
+			if(int.TryParse(match.Groups["rank"].Value, out var rank))
 			{
 				if(!legend && rank > 25)
 					throw new ApplicationException("Rank can not be higher than 25");

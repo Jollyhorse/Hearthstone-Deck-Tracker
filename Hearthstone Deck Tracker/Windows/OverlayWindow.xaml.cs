@@ -1,22 +1,22 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Hearthstone_Deck_Tracker.Annotations;
 using Hearthstone_Deck_Tracker.Controls;
-using Hearthstone_Deck_Tracker.Enums;
 using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using static System.Windows.Visibility;
 using Card = Hearthstone_Deck_Tracker.Hearthstone.Card;
+using HearthDb.Enums;
+using Hearthstone_Deck_Tracker.Controls.Overlay;
 
 #endregion
 
@@ -28,6 +28,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 	// ReSharper disable once RedundantExtendsListEntry
 	public partial class OverlayWindow : Window, INotifyPropertyChanged
 	{
+		private const string LocFatigue = "Overlay_DeckList_Label_Fatigue";
 		private const int ChancePanelsMargins = 8;
 		private readonly Point[][] _cardMarkPos = new Point[MaxHandSize][];
 		private readonly List<CardMarker> _cardMarks = new List<CardMarker>();
@@ -41,6 +42,8 @@ namespace Hearthstone_Deck_Tracker.Windows
 		private readonly List<Ellipse> _oppBoard = new List<Ellipse>();
 		private readonly List<Ellipse> _playerBoard = new List<Ellipse>();
 		private readonly List<Rectangle> _playerHand = new List<Rectangle>();
+		private readonly List<Rectangle> _leaderboardIcons = new List<Rectangle>();
+		private readonly List<BattlegroundsTier> _tierlistIcons = new List<BattlegroundsTier>();
 		private bool? _isFriendsListOpen;
 		private string _lastToolTipCardId;
 		private bool _lmbDown;
@@ -104,10 +107,24 @@ namespace Hearthstone_Deck_Tracker.Windows
 		public VerticalAlignment OpponentStackPanelAlignment
 			=> Config.Instance.OverlayCenterOpponentStackPanel ? VerticalAlignment.Center : VerticalAlignment.Top;
 
+		public double BattlegroundsTileHeight => Height * 0.69 / 8;
+		public double BattlegroundsTileWidth => BattlegroundsTileHeight;
+
 		public void ShowOverlay(bool enable)
 		{
 			if(enable)
-				Show();
+			{
+				try
+				{
+					Show();
+				}
+				catch(InvalidOperationException e)
+				{
+					Log.Error(e);
+				}
+				if(User32.GetForegroundWindow() == new WindowInteropHelper(this).Handle)
+					User32.BringHsToForeground();
+			}
 			else
 				Hide();
 		}
@@ -120,6 +137,8 @@ namespace Hearthstone_Deck_Tracker.Windows
 
 		private void SetRect(int top, int left, int width, int height)
 		{
+			if(width < 0 || height < 0)
+				return;
 			Top = top + _offsetY;
 			Left = left + _offsetX;
 			Width = (_customWidth == -1) ? width : _customWidth;
@@ -140,22 +159,22 @@ namespace Hearthstone_Deck_Tracker.Windows
 
 		public void ShowTimers()
 			=>
-				LblPlayerTurnTime.Visibility =
-				LblOpponentTurnTime.Visibility = LblTurnTime.Visibility = Config.Instance.HideTimers ? Hidden : Visible;
+				LblPlayerTurnTime.Visibility = LblOpponentTurnTime.Visibility = LblTurnTime.Visibility
+				= (Config.Instance.HideTimers || _game.CurrentGameType == GameType.GT_BATTLEGROUNDS) ? Hidden : Visible;
 
-		public void ShowSecrets(bool force = false, HeroClass? heroClass = null)
+		public void ShowSecrets(List<Card> secrets, bool force = false)
 		{
-			if(Config.Instance.HideSecrets && !force)
+			if((Config.Instance.HideSecrets || _game.CurrentGameType == GameType.GT_BATTLEGROUNDS) && !force)
 				return;
 
 			StackPanelSecrets.Children.Clear();
-			var secrets = heroClass == null ? _game.OpponentSecrets.GetSecrets() : _game.OpponentSecrets.GetDefaultSecrets(heroClass.Value);
-			foreach(var id in secrets)
+
+			foreach(var secret in secrets)
 			{
+				if(secret.Count <= 0 && Config.Instance.RemoveSecretsFromList)
+					continue;
 				var cardObj = new Controls.Card();
-				var card = Database.GetCardFromId(id.CardId);
-				card.Count = id.AdjustedCount(_game);
-				cardObj.SetValue(DataContextProperty, card);
+				cardObj.SetValue(DataContextProperty, secret);
 				StackPanelSecrets.Children.Add(cardObj);
 			}
 
@@ -163,6 +182,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 		}
 
 		public void HideSecrets() => StackPanelSecrets.Visibility = Collapsed;
+		public void UnhideSecrects() => StackPanelSecrets.Visibility = Visible;
 
 		private void Window_Closing(object sender, CancelEventArgs e)
 		{
@@ -184,8 +204,6 @@ namespace Hearthstone_Deck_Tracker.Windows
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
-
-		public void ShowFriendsListWarning(bool show) => StackPanelFriendsListWarning.Visibility = show ? Visible : Collapsed;
 
 		public void ShowRestartRequiredWarning() => TextBlockRestartWarning.Visibility = Visible;
 

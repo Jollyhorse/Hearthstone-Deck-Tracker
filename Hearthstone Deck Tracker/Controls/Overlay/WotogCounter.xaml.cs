@@ -15,8 +15,14 @@ namespace Hearthstone_Deck_Tracker.Controls.Overlay
 		private string _attack = "6";
 		private string _health = "6";
 		private string _spells = "0";
-		private WotogCounterStyle _wotogCounterStyle;
+		private string _jade = "1";
+		private string _pogoHopper = "1";
+		private string _galakrond = "0";
 
+		private WotogCounterStyle _wotogCounterStyle;
+		private WotogCounterStyle _jadeCounterStyle;
+		private WotogCounterStyle _pogoHopperCounterStyle;
+		private WotogCounterStyle _galakrondCounterStyle;
 
 		public WotogCounter()
 		{
@@ -59,6 +65,41 @@ namespace Hearthstone_Deck_Tracker.Controls.Overlay
 			}
 		}
 
+		public string Jade
+		{
+			get { return _jade; }
+			set {
+				if (value == _jade)
+					return;
+				_jade = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public string PogoHopper
+		{
+			get { return _pogoHopper; }
+			set
+			{
+				if (value == _pogoHopper)
+					return;
+				_pogoHopper = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public string Galakrond
+		{
+			get { return _galakrond; }
+			set
+			{
+				if(value == _galakrond)
+					return;
+				_galakrond = value;
+				OnPropertyChanged();
+			}
+		}
+
 		public WotogCounterStyle WotogCounterStyle
 		{
 			get { return _wotogCounterStyle; }
@@ -74,10 +115,48 @@ namespace Hearthstone_Deck_Tracker.Controls.Overlay
 			}
 		}
 
+		public WotogCounterStyle JadeCounterStyle
+		{
+			get { return _jadeCounterStyle; }
+			set {
+				if (value == _jadeCounterStyle)
+					return;
+				_jadeCounterStyle = value;
+				OnPropertyChanged(nameof(JadeVisibility));
+			}
+		}
+
+		public WotogCounterStyle PogoHopperCounterStyle
+		{
+			get { return _pogoHopperCounterStyle; }
+			set
+			{
+				if (value == _pogoHopperCounterStyle)
+					return;
+				_pogoHopperCounterStyle = value;
+				OnPropertyChanged(nameof(PogoHopperVisibility));
+			}
+		}
+
+		public WotogCounterStyle GalakrondCounterStyle
+		{
+			get { return _galakrondCounterStyle; }
+			set
+			{
+				if (value == _galakrondCounterStyle)
+					return;
+				_galakrondCounterStyle = value;
+				OnPropertyChanged(nameof(GalakrondVisibility));
+			}
+		}
+
 		public int IconWidth => WotogCounterStyle == WotogCounterStyle.Full ? 226 : 145;
 		public Visibility CthunVisibility => _forceShow || WotogCounterStyle == WotogCounterStyle.Cthun ? Visibility.Visible : Visibility.Collapsed;
 		public Visibility SpellsVisibility => !_forceShow && WotogCounterStyle == WotogCounterStyle.Spells ? Visibility.Visible : Visibility.Collapsed;
 		public Visibility FullVisibility => !_forceShow && WotogCounterStyle == WotogCounterStyle.Full ? Visibility.Visible : Visibility.Collapsed;
+		public Visibility JadeVisibility => !_forceShow && JadeCounterStyle == WotogCounterStyle.Full ? Visibility.Visible : Visibility.Collapsed;
+		public Visibility PogoHopperVisibility => !_forceShow && PogoHopperCounterStyle == WotogCounterStyle.Full ? Visibility.Visible : Visibility.Collapsed;
+		public Visibility GalakrondVisibility => !_forceShow && GalakrondCounterStyle == WotogCounterStyle.Full ? Visibility.Visible : Visibility.Collapsed;
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
@@ -93,6 +172,9 @@ namespace Hearthstone_Deck_Tracker.Controls.Overlay
 			OnPropertyChanged(nameof(CthunVisibility));
 			OnPropertyChanged(nameof(SpellsVisibility));
 			OnPropertyChanged(nameof(FullVisibility));
+			OnPropertyChanged(nameof(JadeVisibility));
+			OnPropertyChanged(nameof(PogoHopperVisibility));
+			OnPropertyChanged(nameof(GalakrondVisibility));
 		}
 	}
 

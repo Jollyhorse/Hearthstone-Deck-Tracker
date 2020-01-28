@@ -11,9 +11,14 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
+using HearthDb.Enums;
 using HearthMirror.Objects;
 using Hearthstone_Deck_Tracker.Annotations;
 using Hearthstone_Deck_Tracker.Enums;
+using Hearthstone_Deck_Tracker.Hearthstone;
+using Hearthstone_Deck_Tracker.HsReplay;
+using Hearthstone_Deck_Tracker.HsReplay.Utility;
+using Hearthstone_Deck_Tracker.Properties;
 using Hearthstone_Deck_Tracker.Utility;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using Card = Hearthstone_Deck_Tracker.Hearthstone.Card;
@@ -29,7 +34,6 @@ namespace Hearthstone_Deck_Tracker.Stats
 		private string _deckName;
 		private string _deckNameAndVersion;
 		public Guid GameId;
-		public string HearthStatsId;
 		private Format _format = Enums.Format.Standard;
 		private string _note;
 		private string _playerHero;
@@ -41,6 +45,7 @@ namespace Hearthstone_Deck_Tracker.Stats
 		private string _playerName;
 		private string _opponentName;
 		private int _rank;
+		private int _battlegroundsRating;
 		private int _stars;
 		private int _legendRank;
 		private Region _region;
@@ -59,6 +64,7 @@ namespace Hearthstone_Deck_Tracker.Stats
 			PlayerHero = playerHero;
 			StartTime = DateTime.Now;
 			GameId = Guid.NewGuid();
+			HearthstoneBuild = Helper.GetHearthstoneBuild();
 		}
 
 		//playerhero does not get loaded from xml for some reason
@@ -186,6 +192,17 @@ namespace Hearthstone_Deck_Tracker.Stats
 			}
 		}
 
+		public int BattlegroundsRating
+		{
+			get { return _battlegroundsRating; }
+			set
+			{
+				_battlegroundsRating = value;
+				OnPropertyChanged();
+				OnPropertyChanged(nameof(BattlegroundsRating));
+			}
+		}
+
 		public int OpponentLegendRank
 		{
 			get { return _opponentLegendRank; }
@@ -198,15 +215,35 @@ namespace Hearthstone_Deck_Tracker.Stats
 
 		public int OpponentRank { get; set; }
 
+		public int? HearthstoneBuild { get; set; }
+		
 		public int PlayerCardbackId { get; set; }
 
 		public int OpponentCardbackId { get; set; }
 
 		public int FriendlyPlayerId { get; set; }
 
+		public int OpponentPlayerId { get; set; }
+
 		public int ScenarioId { get; set; }
 
 		public GameServerInfo ServerInfo { get; set; }
+
+		public GameType GameType { get; set; }
+
+		public int BrawlSeasonId { get; set; }
+
+		public int RankedSeasonId { get; set; }
+
+		public int ArenaWins { get; set; }
+
+		public int ArenaLosses { get; set; }
+
+		public int BrawlWins { get; set; }
+
+		public int BrawlLosses { get; set; }
+
+		public string OpponentHeroCardId { get; set; }
 
 		public Region Region
 		{
@@ -311,7 +348,7 @@ namespace Hearthstone_Deck_Tracker.Stats
 
 		public SerializableVersion PlayerDeckVersion { get; set; }
 
-		public bool IsAssociatedWithDeckVersion => PlayerDeckVersion != null || !string.IsNullOrEmpty(HearthStatsDeckVersionId);
+		public bool IsAssociatedWithDeckVersion => PlayerDeckVersion != null;
 
 		[XmlIgnore]
 		public string PlayerDeckVersionString => PlayerDeckVersion != null ? PlayerDeckVersion.ToString("v{M}.{m}") : SerializableVersion.Default.ToString("v{M}.{m}");
@@ -329,24 +366,10 @@ namespace Hearthstone_Deck_Tracker.Stats
 		public bool CanSelectDeck => DeckList.Instance.Decks.Any(d => d.DeckId == DeckId);
 
 		[XmlIgnore]
-		public BitmapImage OpponentHeroImage
-		{
-			get
-			{
-				HeroClassAll oppHero;
-				return Enum.TryParse(OpponentHero, out oppHero) ? ImageCache.GetClassIcon(oppHero) : new BitmapImage();
-			}
-		}
+		public BitmapImage OpponentHeroImage => Enum.TryParse(OpponentHero, out HeroClassAll oppHero) ? ImageCache.GetClassIcon(oppHero) : new BitmapImage();
 
 		[XmlIgnore]
-		public BitmapImage PlayerHeroImage
-		{
-			get
-			{
-				HeroClassAll playerHero;
-				return Enum.TryParse(PlayerHero, out playerHero) ? ImageCache.GetClassIcon(playerHero) : new BitmapImage();
-			}
-		}
+		public BitmapImage PlayerHeroImage => Enum.TryParse(PlayerHero, out HeroClassAll playerHero) ? ImageCache.GetClassIcon(playerHero) : new BitmapImage();
 
 		[XmlIgnore]
 		public string Duration => (EndTime - StartTime).Minutes + " min";
@@ -355,25 +378,22 @@ namespace Hearthstone_Deck_Tracker.Stats
 		public int SortableDuration => (EndTime - StartTime).Minutes;
 
 		[XmlIgnore]
-		public string GotCoin
-		{
-			get { return Coin ? "Yes" : "No"; }
-			set { Coin = value.ToLower() == "Yes"; }
-		}
+		public string Age => LocUtil.GetAge(StartTime);
 
 		[XmlIgnore]
-		public bool HasHearthStatsId => !string.IsNullOrEmpty(HearthStatsId);
+		public string GotCoin
+		{
+			get { return Coin ? LocUtil.Get(nameof(Strings.Enum_YesNo_Yes)) : LocUtil.Get(nameof(Strings.Enum_YesNo_No)); }
+			set { Coin = value == LocUtil.Get(nameof(Strings.Enum_YesNo_Yes)); }
+		}
 
-		public string HearthStatsDeckId { get; set; }
-		public string HearthStatsDeckVersionId { get; set; }
+		public HsReplayInfo HsReplay { get; set; } = new HsReplayInfo();
 
-		public bool HasHearthStatsDeckVersionId => !string.IsNullOrEmpty(HearthStatsDeckVersionId) && int.Parse(HearthStatsDeckVersionId) > 0;
+		public string ReplayState => !HasReplayFile ? "N/A" : HsReplay.Uploaded ? "Uploaded" : HsReplay.Unsupported ? "Unsupported" : "-";
 
-		public bool HasHearthStatsDeckId => !string.IsNullOrEmpty(HearthStatsDeckId) && int.Parse(HearthStatsDeckId) > 0;
+		public void UpdateReplayState() => OnPropertyChanged(nameof(ReplayState));
 
 		public bool BelongsToDeckVerion(Deck deck) => PlayerDeckVersion == deck.Version
-													  || (HasHearthStatsDeckVersionId && HearthStatsDeckVersionId == deck.HearthStatsDeckVersionId)
-													  || (!HasHearthStatsDeckVersionId && HasHearthStatsDeckId && HearthStatsDeckId == deck.HearthStatsId)
 													  || !IsAssociatedWithDeckVersion && deck.Version == new SerializableVersion(1, 0);
 
 		public GameStats CloneWithNewId()
@@ -390,6 +410,8 @@ namespace Hearthstone_Deck_Tracker.Stats
 				ReplayFile = ReplayFile,
 				WasConceded = WasConceded,
 				PlayerDeckVersion = PlayerDeckVersion,
+				HearthstoneBuild = HearthstoneBuild,
+				HsReplay = HsReplay,
 				IsClone = true
 			};
 			return newGame;
@@ -416,14 +438,9 @@ namespace Hearthstone_Deck_Tracker.Stats
 			Log.Info("Current Game ended after " + Turns + " turns");
 		}
 
-		public override string ToString() => Result + " vs " + OpponentHero + ", " + StartTime;
+		public override string ToString() => $"[{GameMode}] {Result} VS. {OpponentName} ({OpponentHero}), {StartTime.ToString("g")}";
 
-		public void ResetHearthstatsIds()
-		{
-			HearthStatsDeckId = null;
-			HearthStatsDeckVersionId = null;
-			HearthStatsId = null;
-		}
+		public long HsDeckId { get; set; }
 
 		[XmlArray(ElementName = "PlayerCards")]
 		[XmlArrayItem(ElementName = "Card")]
@@ -432,7 +449,21 @@ namespace Hearthstone_Deck_Tracker.Stats
 		[XmlArrayItem(ElementName = "Card")]
 		public List<TrackedCard> OpponentCards { get; set; } = new List<TrackedCard>();
 
-		public void SetPlayerCards(Deck deck, List<Card> revealedCards)
+		public string VersusLabel => LocUtil.Get("DeckCharts_Replays_Label_Vs");
+		public string UploadedTooltip => LocUtil.Get("DeckCharts_Tooltip_Uploaded");
+		public string NoReplayDataTooltip => LocUtil.Get("DeckCharts_Tooltip_NoReplayData");
+
+		public bool IsDungeonMatch => GameType == GameType.GT_VS_AI && DungeonRun.IsDungeonBoss(OpponentHeroCardId);
+
+		public void SetPlayerCards(Deck deck, List<Card> revealedCards) => SetPlayerCards(deck?.Cards, revealedCards);
+
+		public void SetPlayerCards(HearthMirror.Objects.Deck deck, List<Card> revealedCards)
+		{
+			var cards = deck?.Cards.Select(c => new Card {Id = c.Id, Count = c.Count});
+			SetPlayerCards(cards, revealedCards);
+		}
+
+		public void SetPlayerCards(IEnumerable<Card> deck, List<Card> revealedCards)
 		{
 			PlayerCards.Clear();
 			foreach(var c in revealedCards)
@@ -445,7 +476,7 @@ namespace Hearthstone_Deck_Tracker.Stats
 			}
 			if(deck != null)
 			{
-				foreach(var c in deck.Cards)
+				foreach(var c in deck)
 				{
 					var e = PlayerCards.FirstOrDefault(x => x.Id == c.Id);
 					if(e == null)
@@ -487,43 +518,20 @@ namespace Hearthstone_Deck_Tracker.Stats
 		public bool ShouldSerializePlayerCardbackId() => PlayerCardbackId > 0;
 		public bool ShouldSerializeOpponentCardbackId() => OpponentCardbackId > 0;
 		public bool ShouldSerializeFriendlyPlayerId() => FriendlyPlayerId > 0;
+		public bool ShouldSerializeOpponentPlayerId() => OpponentPlayerId > 0;
 		public bool ShouldSerializeScenarioId() => ScenarioId > 0;
 		public bool ShouldSerializeServerInfo() => ServerInfo != null;
+		public bool ShouldSerializeHsReplay() => HsReplay.UploadTries > 0 || HsReplay.Uploaded;
+		public bool ShouldSerializeHsDeckId() => HsDeckId > 0;
+		public bool ShouldSerializeGameType() => GameType != GameType.GT_UNKNOWN;
+		public bool ShouldSerializeBrawlSeasonId() => BrawlSeasonId > 0;
+		public bool ShouldSerializeRankedSeasonId() => RankedSeasonId > 0;
+		public bool ShouldSerializeArenaWins() => ArenaWins > 0;
+		public bool ShouldSerializeArenaLosses() => ArenaLosses > 0;
+		public bool ShouldSerializeBrawlWins() => BrawlWins > 0;
+		public bool ShouldSerializeBrawlLosses() => BrawlLosses > 0;
+		public bool ShouldSerializeBattlegroundsRating() => BattlegroundsRating > 0;
 
-		#region Obsolete
-
-		private string GameFile => Config.Instance.DataDir + $@"Games\Game_{GameId}.xml";
-
-		internal List<TurnStats> LoadTurnStats()
-		{
-			if(GameId == Guid.Empty || !File.Exists(GameFile))
-				return new List<TurnStats>();
-			try
-			{
-				return XmlManager<List<TurnStats>>.Load(GameFile);
-			}
-			catch(Exception ex)
-			{
-				Log.Error($"Error loading file: {GameFile}/n{ex}");
-			}
-			return new List<TurnStats>();
-		}
-
-		internal void DeleteGameFile()
-		{
-			try
-			{
-				if(!File.Exists(GameFile))
-					return;
-				File.Delete(GameFile);
-				Log.Info("Deleted gamefile: " + GameFile);
-			}
-			catch(Exception ex)
-			{
-				Log.Error($"Error deleting gamefile: {GameFile}/n{ex}");
-			}
-		}
-		#endregion
 
 		public event PropertyChangedEventHandler PropertyChanged;
 

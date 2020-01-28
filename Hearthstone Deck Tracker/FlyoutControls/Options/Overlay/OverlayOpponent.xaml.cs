@@ -86,37 +86,58 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			ComboBoxCthun.SelectedItem = Config.Instance.OpponentCthunCounter;
 			ComboBoxSpells.ItemsSource = new[] {DisplayMode.Always, DisplayMode.Never};
 			ComboBoxSpells.SelectedItem = Config.Instance.OpponentSpellsCounter;
+			ComboBoxJade.ItemsSource = Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>();
+			ComboBoxJade.SelectedItem = Config.Instance.OpponentJadeCounter;
+			ComboBoxPogoHopper.ItemsSource = Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>();
+			ComboBoxPogoHopper.SelectedItem = Config.Instance.OpponentPogoHopperCounter;
+			ComboBoxGalakrond.ItemsSource = Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>();
+			ComboBoxGalakrond.SelectedItem = Config.Instance.OpponentGalakrondCounter;
+			CheckboxHideOpponentCardAge.IsChecked = Config.Instance.HideOpponentCardAge;
+			CheckboxHideOpponentCardMarks.IsChecked = Config.Instance.HideOpponentCardMarks;
+			CheckboxHideSecrets.IsChecked = Config.Instance.HideSecrets;
 
 			ElementSorterOpponent.IsPlayer = false;
-			foreach(var itemName in Config.Instance.PanelOrderOpponent)
-			{
-				switch(itemName)
-				{
-					case "Cards":
-						ElementSorterOpponent.AddItem(new ElementSorterItem("Cards", !Config.Instance.HideOpponentCards,
-						                                                    value => Config.Instance.HideOpponentCards = !value, false));
-						break;
-					case "Card Counter":
-						ElementSorterOpponent.AddItem(new ElementSorterItem("Card Counter", !Config.Instance.HideOpponentCardCount,
-						                                                    value => Config.Instance.HideOpponentCardCount = !value, false));
-						break;
-					case "Fatigue Counter":
-						ElementSorterOpponent.AddItem(new ElementSorterItem("Fatigue Counter", !Config.Instance.HideOpponentFatigueCount,
-						                                                    value => Config.Instance.HideOpponentFatigueCount = !value, false));
-						break;
-					case "Draw Chances":
-						ElementSorterOpponent.AddItem(new ElementSorterItem("Draw Chances", !Config.Instance.HideOpponentDrawChances,
-						                                                    value => Config.Instance.HideOpponentDrawChances = !value, false));
-						break;
-					case "Win Rate":
-						ElementSorterOpponent.AddItem(new ElementSorterItem("Win Rate", Config.Instance.ShowWinRateAgainst,
-						                                                    value => Config.Instance.ShowWinRateAgainst = value, false));
-						break;
-				}
-			}
+			SetPanel();
+
 			Core.Overlay.UpdateOpponentLayout();
 			Core.Windows.OpponentWindow.UpdateOpponentLayout();
 			_initialized = true;
+		}
+
+		private void SetPanel()
+		{
+			foreach(var panel in Config.Instance.DeckPanelOrderOpponent)
+			{
+				switch(panel)
+				{
+					case Enums.DeckPanel.Winrate:
+						ElementSorterOpponent.AddItem(new ElementSorterItem(panel, Config.Instance.ShowWinRateAgainst,
+																			value => Config.Instance.ShowWinRateAgainst = value, false));
+						break;
+					case Enums.DeckPanel.Cards:
+						ElementSorterOpponent.AddItem(new ElementSorterItem(panel, !Config.Instance.HideOpponentCards,
+																			value => Config.Instance.HideOpponentCards = !value, false));
+						break;
+					case Enums.DeckPanel.CardCounter:
+						ElementSorterOpponent.AddItem(new ElementSorterItem(panel, !Config.Instance.HideOpponentCardCount,
+																			value => Config.Instance.HideOpponentCardCount = !value, false));
+						break;
+					case Enums.DeckPanel.DrawChances:
+						ElementSorterOpponent.AddItem(new ElementSorterItem(panel, !Config.Instance.HideOpponentDrawChances,
+																			value => Config.Instance.HideOpponentDrawChances = !value, false));
+						break;
+					case Enums.DeckPanel.Fatigue:
+						ElementSorterOpponent.AddItem(new ElementSorterItem(panel, !Config.Instance.HideOpponentFatigueCount,
+																			value => Config.Instance.HideOpponentFatigueCount = !value, false));
+						break;
+				}
+			}
+		}
+
+		public void ReloadUI()
+		{
+			ElementSorterOpponent.Clear();
+			SetPanel();
 		}
 
 		private void CheckboxHighlightDiscarded_Checked(object sender, RoutedEventArgs e)
@@ -240,6 +261,14 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			Config.Save();
 		}
 
+		private void ComboBoxJade_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (!_initialized)
+				return;
+			Config.Instance.OpponentJadeCounter = (DisplayMode)ComboBoxJade.SelectedItem;
+			Config.Save();
+		}
+
 		private void CheckBoxAttack_Checked(object sender, RoutedEventArgs e)
 		{
 			if(!_initialized)
@@ -253,6 +282,72 @@ namespace Hearthstone_Deck_Tracker.FlyoutControls.Options.Overlay
 			if(!_initialized)
 				return;
 			Config.Instance.HideOpponentAttackIcon = true;
+			Config.Save();
+		}
+
+		private void CheckboxHideOpponentCardAge_Unchecked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.HideOpponentCardAge = false;
+			SaveConfig(true);
+		}
+
+		private void CheckboxHideOpponentCardAge_Checked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.HideOpponentCardAge = true;
+			SaveConfig(true);
+		}
+
+		private void CheckboxHideOpponentCardMarks_Unchecked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.HideOpponentCardMarks = false;
+			SaveConfig(true);
+		}
+
+		private void CheckboxHideOpponentCardMarks_Checked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.HideOpponentCardMarks = true;
+			SaveConfig(true);
+		}
+
+		private void CheckboxHideSecrets_Checked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.HideSecrets = true;
+			SaveConfig(false);
+			Core.Overlay.HideSecrets();
+		}
+
+		private void CheckboxHideSecrets_Unchecked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized)
+				return;
+			Config.Instance.HideSecrets = false;
+			SaveConfig(false);
+			Core.Overlay.ShowSecrets(Core.Game.SecretsManager.GetSecretList());
+		}
+
+		private void ComboBoxPogoHopper_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (!_initialized)
+				return;
+			Config.Instance.OpponentPogoHopperCounter = (DisplayMode)ComboBoxPogoHopper.SelectedItem;
+			Config.Save();
+		}
+
+		private void ComboBoxGalakrond_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (!_initialized)
+				return;
+			Config.Instance.OpponentGalakrondCounter = (DisplayMode)ComboBoxGalakrond.SelectedItem;
 			Config.Save();
 		}
 	}

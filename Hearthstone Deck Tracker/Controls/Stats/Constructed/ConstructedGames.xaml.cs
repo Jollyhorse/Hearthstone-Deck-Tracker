@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using Hearthstone_Deck_Tracker.Annotations;
+using Hearthstone_Deck_Tracker.HsReplay;
 using Hearthstone_Deck_Tracker.Replay;
 using Hearthstone_Deck_Tracker.Stats;
 using Hearthstone_Deck_Tracker.Stats.CompiledStats;
@@ -70,12 +71,11 @@ namespace Hearthstone_Deck_Tracker.Controls.Stats.Constructed
 			}
 		}
 
-		private void ButtonShowReplay_OnClick(object sender, RoutedEventArgs e)
+		private async void ButtonShowReplay_OnClick(object sender, RoutedEventArgs e)
 		{
-			if(SelectedGame == null)
-				return;
-			if(SelectedGame.HasReplayFile)
-				ReplayReader.LaunchReplayViewer(SelectedGame.ReplayFile);
+			var game = SelectedGame;
+			await ReplayLauncher.ShowReplay(game, true);
+			game.UpdateReplayState();
 		}
 
 		private async void ButtonEdit_OnClick(object sender, RoutedEventArgs e)
@@ -173,14 +173,6 @@ namespace Hearthstone_Deck_Tracker.Controls.Stats.Constructed
 			var dialog = Helper.GetParentWindow(Core.StatsOverview)?.ShowAddGameDialog(deck);
 			if(dialog != null && await dialog)
 				ConstructedStats.Instance.UpdateGames();
-		}
-
-		private void ButtonSelectDeck_OnClick(object sender, RoutedEventArgs e)
-		{
-			var deck = DeckList.Instance.Decks.FirstOrDefault(x => x.DeckId == SelectedGame.DeckId);
-			if(deck?.Equals(DeckList.Instance.ActiveDeck) ?? true)
-				return;
-			Core.MainWindow.SelectDeck(deck, true);
 		}
 	}
 }

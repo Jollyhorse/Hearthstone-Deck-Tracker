@@ -1,7 +1,8 @@
-﻿#region
+#region
 
 using System.Reflection;
 using System.Resources;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -16,7 +17,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("HearthSim")]
 [assembly: AssemblyProduct("Hearthstone Deck Tracker")]
-[assembly: AssemblyCopyright("Copyright © HearthSim")]
+[assembly: AssemblyCopyright("Copyright © HearthSim 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -56,8 +57,10 @@ using System.Windows;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.5.0")]
-[assembly: AssemblyFileVersion("1.0.5.0")]
+[assembly: AssemblyVersion("1.9.10")]
+[assembly: AssemblyFileVersion("1.9.10")]
 [assembly: NeutralResourcesLanguage("en")]
 
 [assembly: AssemblyMetadata("SquirrelAwareVersion", "1")]
+
+[assembly: InternalsVisibleTo("ResourceGenerator")]

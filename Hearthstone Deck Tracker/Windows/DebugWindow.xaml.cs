@@ -71,12 +71,14 @@ namespace Hearthstone_Deck_Tracker.Windows
 				new CollectionItem(_game.Player.Graveyard, "Player Graveyard"),
 				new CollectionItem(_game.Player.Secrets, "Player Secrets"),
 				new CollectionItem(_game.Player.RevealedEntities, "Player RevealedEntities"),
+				new CollectionItem(_game.Player.SetAside, "Player SetAside"),
 				new CollectionItem(_game.Opponent.Hand, "Opponent Hand"),
 				new CollectionItem(_game.Opponent.Board, "Opponent Board"),
 				new CollectionItem(_game.Opponent.Deck, "Opponent Deck"),
 				new CollectionItem(_game.Opponent.Graveyard, "Opponent Graveyard"),
 				new CollectionItem(_game.Opponent.Secrets, "Opponent Secrets"),
-				new CollectionItem(_game.Opponent.RevealedEntities, "Opponent RevealedEntities")
+				new CollectionItem(_game.Opponent.RevealedEntities, "Opponent RevealedEntities"),
+				new CollectionItem(_game.Opponent.SetAside, "Opponent SetAside")
 			};
 			foreach(var collection in collections)
 			{
@@ -93,7 +95,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 
 		private void UpdateBoardDamage()
 		{
-			if(Core.Game.Entities.Count < 67)
+			if(!Core.Game.SetupDone)
 				return;
 			var board = new BoardState();
 			PlayerDataGrid.ItemsSource = board.Player.Cards;
@@ -105,7 +107,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 
 		private void FilterEntities()
 		{
-			List<object> list = new List<object>();
+			var list = new List<object>();
 			foreach(var entity in _game.Entities)
 			{
 				var tags = entity.Value.Tags.Select(GetTagKeyValue).Aggregate((c, n) => c + " | " + n);
@@ -123,8 +125,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 				DataGridProperties.UpdateLayout();
 				foreach(var item in firstNotSecond)
 				{
-					var row = DataGridProperties.ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
-					if(row != null)
+					if(DataGridProperties.ItemContainerGenerator.ContainerFromItem(item) is DataGridRow row)
 						row.Background = new SolidColorBrush(Color.FromArgb(50, 0, 205, 0));
 				}
 				_previous = list;
@@ -133,7 +134,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 
 		private string GetTagKeyValue(KeyValuePair<GameTag, int> pair)
 		{
-			string value = pair.Value.ToString();
+			var value = pair.Value.ToString();
 			switch(pair.Key)
 			{
 				case GameTag.ZONE:
@@ -154,13 +155,13 @@ namespace Hearthstone_Deck_Tracker.Windows
 
 		private void FilterGame()
 		{
-			List<object> list = new List<object>();
+			var list = new List<object>();
 			var props = typeof(GameV2).GetProperties().OrderBy(x => x.Name);
 			foreach(var prop in props)
 			{
 				if(prop.Name == "HSLogLines" || prop.Name == "Entities")
 					continue;
-				string val = "";
+				var val = "";
 				var propVal = prop.GetValue(_game, null);
 				if(propVal != null)
 				{
@@ -191,8 +192,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 				DataGridProperties.UpdateLayout();
 				foreach(var item in firstNotSecond)
 				{
-					var row = DataGridProperties.ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
-					if(row != null)
+					if(DataGridProperties.ItemContainerGenerator.ContainerFromItem(item) is DataGridRow row)
 						row.Background = new SolidColorBrush(Color.FromArgb(50, 0, 205, 0));
 				}
 				_previous = list;

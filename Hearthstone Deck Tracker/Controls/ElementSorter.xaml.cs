@@ -21,6 +21,8 @@ namespace Hearthstone_Deck_Tracker
 
 		public void AddItem(ElementSorterItem item) => StackPanel.Children.Add(item);
 
+		public void Clear() => StackPanel.Children.Clear();
+
 		public void MoveItem(ElementSorterItem item, SortDirection direction)
 		{
 			var index = StackPanel.Children.IndexOf(item) + (direction == SortDirection.Up ? -1 : 1);
@@ -34,9 +36,9 @@ namespace Hearthstone_Deck_Tracker
 			StackPanel.Children.Insert(index, item);
 
 			if(IsPlayer)
-				Config.Instance.PanelOrderPlayer = StackPanel.Children.Cast<ElementSorterItem>().Select(x => x.ItemName).ToArray();
+				Config.Instance.DeckPanelOrderPlayer = StackPanel.Children.Cast<ElementSorterItem>().Select(x => x.Panel).ToArray();
 			else
-				Config.Instance.PanelOrderOpponent = StackPanel.Children.Cast<ElementSorterItem>().Select(x => x.ItemName).ToArray();
+				Config.Instance.DeckPanelOrderOpponent = StackPanel.Children.Cast<ElementSorterItem>().Select(x => x.Panel).ToArray();
 		}
 	}
 }

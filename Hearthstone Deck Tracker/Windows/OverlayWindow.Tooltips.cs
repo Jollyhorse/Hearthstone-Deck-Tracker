@@ -2,7 +2,6 @@
 
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using HearthDb.Enums;
@@ -38,8 +37,9 @@ namespace Hearthstone_Deck_Tracker.Windows
 			StackPanelAdditionalTooltips.Children.Clear();
 			foreach(var id in card.EntourageCardIds)
 			{
-				var tooltip = new CardToolTip();
+				var tooltip = new CardToolTipControl();
 				tooltip.SetValue(DataContextProperty, Database.GetCardFromId(id));
+				tooltip.CardSetToolTip.Visibility = Config.Instance.OverlaySetToolTips ? Visible : Collapsed;
 				StackPanelAdditionalTooltips.Children.Add(tooltip);
 			}
 
@@ -66,13 +66,14 @@ namespace Hearthstone_Deck_Tracker.Windows
 			var relativePlayerDeckPos = ViewBoxPlayer.PointFromScreen(new Point(pos.X, pos.Y));
 			var relativeOpponentDeckPos = ViewBoxOpponent.PointFromScreen(new Point(pos.X, pos.Y));
 			var relativeSecretsPos = StackPanelSecrets.PointFromScreen(new Point(pos.X, pos.Y));
-			var relativeCardMark = _cardMarks.Select(x => new {Label = x, Pos = x.PointFromScreen(new Point(pos.X, pos.Y))});
+			var relativeCardMark = _cardMarks.Select(x => new { Label = x, Pos = x.PointFromScreen(new Point(pos.X, pos.Y)) });
 			var visibility = (Config.Instance.OverlayCardToolTips && !Config.Instance.OverlaySecretToolTipsOnly)
 								 ? Visible : Hidden;
+			ToolTipCard.CardSetToolTip.Visibility = Config.Instance.OverlaySetToolTips ? Visible : Collapsed;
 
 			var cardMark =
 				relativeCardMark.FirstOrDefault(
-											    x =>
+												x =>
 												x.Label.IsVisible && PointInsideControl(x.Pos, x.Label.ActualWidth, x.Label.ActualHeight, new Thickness(3, 1, 7, 1)));
 			if(!Config.Instance.HideOpponentCardMarks && cardMark != null)
 			{
@@ -92,7 +93,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 			else if(ListViewPlayer.Visibility == Visible && StackPanelPlayer.Visibility == Visible
 					&& PointInsideControl(relativePlayerDeckPos, ListViewPlayer.ActualWidth, ListViewPlayer.ActualHeight))
 			{
-				//card size = card list height / ammount of cards
+				//card size = card list height / amount of cards
 				var cardSize = ViewBoxPlayer.ActualHeight / ListViewPlayer.Items.Count;
 				var cardIndex = (int)(relativePlayerDeckPos.Y / cardSize);
 				if(cardIndex < 0 || cardIndex >= ListViewPlayer.Items.Count)
@@ -117,7 +118,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 			else if(ListViewOpponent.Visibility == Visible && StackPanelOpponent.Visibility == Visible
 					&& PointInsideControl(relativeOpponentDeckPos, ListViewOpponent.ActualWidth, ListViewOpponent.ActualHeight))
 			{
-				//card size = card list height / ammount of cards
+				//card size = card list height / amount of cards
 				var cardSize = ViewBoxOpponent.ActualHeight / ListViewOpponent.Items.Count;
 				var cardIndex = (int)(relativeOpponentDeckPos.Y / cardSize);
 				if(cardIndex < 0 || cardIndex >= ListViewOpponent.Items.Count)
@@ -141,7 +142,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 			else if(StackPanelSecrets.Visibility == Visible
 					&& PointInsideControl(relativeSecretsPos, StackPanelSecrets.ActualWidth, StackPanelSecrets.ActualHeight))
 			{
-				//card size = card list height / ammount of cards
+				//card size = card list height / amount of cards
 				var cardSize = StackPanelSecrets.ActualHeight / StackPanelSecrets.Children.Count;
 				var cardIndex = (int)(relativeSecretsPos.Y / cardSize);
 				if(cardIndex < 0 || cardIndex >= StackPanelSecrets.Children.Count)
@@ -160,6 +161,49 @@ namespace Hearthstone_Deck_Tracker.Windows
 
 				ToolTipCard.Visibility = Config.Instance.OverlaySecretToolTipsOnly ? Visible : visibility;
 			}
+			else if(BattlegroundsTierlistPanel.Visibility == Visible && _currentTierlist > 0)
+			{
+				var found = false;
+				foreach(var group in BgCardGroups)
+				{
+					var cardList = group.Cards;
+					if(!group.IsVisible || !cardList.IsVisible)
+						continue;
+					var relativePos = cardList.PointFromScreen(new Point(pos.X, pos.Y));
+					if (PointInsideControl(relativePos, cardList.ActualWidth, cardList.ActualHeight))
+					{
+						var cards = cardList.ItemsControl.Items;
+						var cardSize = cardList.ActualHeight / cards.Count;
+						var cardIndex = (int)(relativePos.Y / cardSize);
+						if(cardIndex < 0 || cardIndex >= cards.Count)
+							return;
+						var card = cards.GetItemAt(cardIndex) as AnimatedCard;
+						if(card == null)
+							return;
+						ToolTipCard.SetValue(DataContextProperty, card.GetValue(DataContextProperty));
+
+						//offset is affected by scaling
+						var cardListPos = cardList.TransformToAncestor(CanvasInfo).Transform(new Point(0, 0));
+						var topOffset = cardListPos.Y + cardIndex * cardSize * _scale;
+
+						//prevent tooltip from going outside of the overlay
+						if(topOffset + ToolTipCard.ActualHeight > Height)
+							topOffset = Height - ToolTipCard.ActualHeight;
+
+						Canvas.SetTop(ToolTipCard, topOffset);
+						Canvas.SetLeft(ToolTipCard, cardListPos.X - ToolTipCard.ActualWidth + 22);
+
+						ToolTipCard.Visibility = visibility;
+						found = true;
+					}
+				}
+
+				if(!found)
+				{
+					ToolTipCard.Visibility = Hidden;
+					HideAdditionalToolTips();
+				}
+			}
 			else
 			{
 				ToolTipCard.Visibility = Hidden;
@@ -168,8 +212,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 
 			if(ToolTipCard.Visibility == Visible)
 			{
-				var card = ToolTipCard.GetValue(DataContextProperty) as Card;
-				if(card != null)
+				if(ToolTipCard.GetValue(DataContextProperty) is Card card)
 				{
 					if(_lastToolTipCardId != card.Id)
 					{
@@ -225,15 +268,13 @@ namespace Hearthstone_Deck_Tracker.Windows
 			var offset = 0.0;
 			foreach(var child in stackPanel.Children)
 			{
-				var text = child as HearthstoneTextBlock;
-				if(text != null)
+				if(child is HearthstoneTextBlock text)
 					offset += text.ActualHeight;
 				else
 				{
 					if(child is ListView)
 						break;
-					var sp = child as StackPanel;
-					if(sp != null)
+					if(child is StackPanel sp)
 						offset += sp.ActualHeight;
 				}
 			}
@@ -313,7 +354,7 @@ namespace Hearthstone_Deck_Tracker.Windows
 		{
 			try
 			{
-				if(!Config.Instance.ShowFlavorText || entity?.Card == null)
+				if(!Config.Instance.ShowFlavorText || string.IsNullOrEmpty(entity?.Card?.FormattedFlavorText))
 					return;
 				FlavorText = entity.Card.FormattedFlavorText;
 				FlavorTextCardName = entity.Card.LocalizedName;

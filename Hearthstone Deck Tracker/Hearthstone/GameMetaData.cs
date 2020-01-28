@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 using HearthMirror.Objects;
+using HSReplay;
 
 namespace Hearthstone_Deck_Tracker.Hearthstone
 {
-	public class GameMetaData
+	public class GameMetaData : ICloneable
 	{
 		private int? _hearthstoneBuild;
 		public GameServerInfo ServerInfo;
 		public DateTime EnqueueTime { get; set; }
+		public bool Reconnected { get; set; }
+		public UploadMetaData.TwitchVodData TwitchVodData { get; set; }
 
 		public int? HearthstoneBuild
 		{
@@ -27,5 +26,15 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 
 		public override string ToString() 
 			=> $"HearthstoneBuild={HearthstoneBuild}, ServerAddress={ServerInfo?.Address}, ClientId={ServerInfo?.ClientHandle}, GameId={ServerInfo?.GameHandle}, EnqueueTime={EnqueueTime}";
+
+		public object Clone() => new GameMetaData
+		{
+			_hearthstoneBuild = _hearthstoneBuild,
+			EnqueueTime = EnqueueTime,
+			HearthstoneBuild = HearthstoneBuild,
+			Reconnected = Reconnected,
+			ServerInfo = ServerInfo,
+			TwitchVodData = TwitchVodData
+		};
 	}
 }

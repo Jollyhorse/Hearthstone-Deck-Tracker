@@ -1,9 +1,11 @@
-﻿#if(SQUIRREL)
+#if(SQUIRREL)
 using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using Hearthstone_Deck_Tracker.Utility.Logging;
@@ -15,7 +17,9 @@ namespace Hearthstone_Deck_Tracker.Utility.Updating
 {
 	internal static partial class Updater
 	{
-		private static string _releaseUrl;
+
+		private static bool _useChinaMirror = CultureInfo.CurrentCulture.Name == "zh-CN";
+		private static ReleaseUrls _releaseUrls;
 		private static TimeSpan _updateCheckDelay = new TimeSpan(0, 20, 0);
 		private static bool ShouldCheckForUpdates()
 			=> Config.Instance.CheckForUpdates && DateTime.Now - _lastUpdateCheck >= _updateCheckDelay;
@@ -27,13 +31,20 @@ namespace Hearthstone_Deck_Tracker.Utility.Updating
 			_lastUpdateCheck = DateTime.Now;
 			try
 			{
-				using(var mgr = await UpdateManager.GitHubUpdateManager(await GetReleaseUrl("live"), prerelease: Config.Instance.CheckForBetaUpdates))
+				bool updated;
+				using(var mgr = await GetUpdateManager(false))
+					updated = await SquirrelUpdate(mgr, null);
+
+				if(!updated && Config.Instance.CheckForDevUpdates)
 				{
-					if(await SquirrelUpdate(mgr, null))
-					{
-						_updateCheckDelay = new TimeSpan(1, 0, 0);
-						StatusBar.Visibility = Visibility.Visible;
-					}
+					using(var mgr = await GetUpdateManager(true))
+						updated = await SquirrelUpdate(mgr, null);
+				}
+
+				if(updated)
+				{
+					_updateCheckDelay = new TimeSpan(1, 0, 0);
+					StatusBar.Visibility = Visibility.Visible;
 				}
 			}
 			catch(Exception ex)
@@ -44,8 +55,8 @@ namespace Hearthstone_Deck_Tracker.Utility.Updating
 
 		private static async Task<string> GetReleaseUrl(string release)
 		{
-			if(!string.IsNullOrEmpty(_releaseUrl))
-				return _releaseUrl;
+			if(_releaseUrls != null)
+				return _releaseUrls.GetReleaseUrl(release);
 			var file = Path.Combine(Config.AppDataPath, "releases.json");
 			string fileContent;
 			try
@@ -60,9 +71,19 @@ namespace Hearthstone_Deck_Tracker.Utility.Updating
 			}
 			using(var sr = new StreamReader(file))
 				fileContent = sr.ReadToEnd();
-			_releaseUrl = JsonConvert.DeserializeObject<ReleaseUrls>(fileContent).GetReleaseUrl(release);
-			Log.Info($"using '{release}' release: {_releaseUrl}");
-			return _releaseUrl;
+			_releaseUrls = JsonConvert.DeserializeObject<ReleaseUrls>(fileContent);
+			var url = _releaseUrls.GetReleaseUrl(release);
+			Log.Info($"using '{release}' release: {url}");
+			return url;
+		}
+
+		private static async Task<UpdateManager> GetUpdateManager(bool dev)
+		{
+			if(dev)
+				return await UpdateManager.GitHubUpdateManager(await GetReleaseUrl("dev"));
+			if(_useChinaMirror)
+				return new UpdateManager(await GetReleaseUrl("live-china"));
+			return await UpdateManager.GitHubUpdateManager(await GetReleaseUrl("live"), prerelease: Config.Instance.CheckForBetaUpdates);
 		}
 
 		public static async Task StartupUpdateCheck(SplashScreenWindow splashScreenWindow)
@@ -71,16 +92,41 @@ namespace Hearthstone_Deck_Tracker.Utility.Updating
 			{
 				Log.Info("Checking for updates");
 				bool updated;
-				using(var mgr = await UpdateManager.GitHubUpdateManager(await GetReleaseUrl("live"), prerelease: Config.Instance.CheckForBetaUpdates))
+				using(var mgr = await GetUpdateManager(false))
 				{
+					RegistryHelper.SetExecutablePath(Path.Combine(mgr.RootAppDirectory, "Update.exe"));
+					RegistryHelper.SetExecutableArgs("--processStart \"HearthstoneDeckTracker.exe\"");
 					SquirrelAwareApp.HandleEvents(
-						v => mgr.CreateShortcutForThisExe(),
-						v => mgr.CreateShortcutForThisExe(),
-						onAppUninstall: v => mgr.RemoveShortcutForThisExe(),
+						v =>
+						{
+							mgr.CreateShortcutForThisExe();
+							if(Config.Instance.StartWithWindows)
+								RegistryHelper.SetRunKey();
+						},
+						v =>
+						{
+							mgr.CreateShortcutForThisExe();
+							FixStub();
+							if(Config.Instance.StartWithWindows)
+								RegistryHelper.SetRunKey();
+						},
+						onAppUninstall: v =>
+						{
+							mgr.RemoveShortcutForThisExe();
+							if(Config.Instance.StartWithWindows)
+								RegistryHelper.DeleteRunKey();
+						},
 						onFirstRun: CleanUpInstallerFile
 						);
 					updated = await SquirrelUpdate(mgr, splashScreenWindow);
 				}
+
+				if(!updated && Config.Instance.CheckForDevUpdates)
+				{
+					using(var mgr = await GetUpdateManager(true))
+						updated = await SquirrelUpdate(mgr, null);
+				}
+
 				if(updated)
 				{
 					if(splashScreenWindow.SkipUpdate)
@@ -98,6 +144,24 @@ namespace Hearthstone_Deck_Tracker.Utility.Updating
 			catch(Exception ex)
 			{
 				Log.Error(ex);
+			}
+		}
+
+		public static void FixStub()
+		{
+			var dir = new FileInfo(Assembly.GetEntryAssembly().Location).Directory.FullName;
+			var stubPath = Path.Combine(dir, "HearthstoneDeckTracker_ExecutionStub.exe");
+			if(File.Exists(stubPath))
+			{
+				var newStubPath = Path.Combine(Directory.GetParent(dir).FullName, "HearthstoneDeckTracker.exe");
+				try
+				{
+					File.Move(stubPath, newStubPath);
+				}
+				catch(Exception e)
+				{
+					Log.Error("Could not move ExecutionStub");
+				}
 			}
 		}
 
@@ -156,6 +220,17 @@ namespace Hearthstone_Deck_Tracker.Utility.Updating
 				await mgr.CreateUninstallerRegistryEntry();
 				Log.Info("Done");
 				return true;
+			}
+			catch(WebException ex)
+			{
+				Log.Error(ex);
+				if(!_useChinaMirror)
+				{
+					_useChinaMirror = true;
+					Log.Warn("Now using china mirror");
+					return await SquirrelUpdate(mgr, splashScreenWindow, ignoreDelta);
+				}
+				return false;
 			}
 			catch(Exception ex)
 			{
